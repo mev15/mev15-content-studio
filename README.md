@@ -1,6 +1,6 @@
 # Mev15 Content Studio
 
-面向中文内容创作的 Codex 插件包：微信公众号排版 + 青十五文章配图。
+面向中文内容创作的 Codex 插件包：微信公众号排版 + 青十五文章配图 + 公众号草稿箱发布。
 
 ## 包含的 skills
 
@@ -16,6 +16,10 @@
 ### `qing-shiwu-illustrations`
 
 为中文文章生成青十五风格正文配图和微信公众号、X Articles、知乎等多平台封面。该 skill 与 [`mev15-illustrations`](https://github.com/mev15/mev15-illustrations) 中的当前版本保持一致。
+
+### `gzh-publish`
+
+把排版好的公众号 HTML（正文配图为图床外链）和封面图一键同步到公众号**草稿箱**：自动下载正文外链图片、上传微信素材库并替换为微信 CDN 链接，封面上传为永久素材，最后创建草稿。直连微信官方 API（需自己的 AppID/AppSecret，且运行机器出口 IP 已加公众号后台白名单），零第三方服务、零 npm 依赖（Node ≥ 22.6）。只写草稿箱，不群发、不正式发布。凭据配置：按 skill 内 `env.example` 模板复制到 `~/.config/gzh-publish/env`（本仓库不存放任何凭据）。
 
 ## 安装
 
@@ -38,6 +42,18 @@ codex plugin add mev15-content-studio@mev15
 mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills"
 cp -R plugins/mev15-content-studio/skills/gzh-design "${CODEX_HOME:-$HOME/.codex}/skills/"
 cp -R plugins/mev15-content-studio/skills/qing-shiwu-illustrations "${CODEX_HOME:-$HOME/.codex}/skills/"
+cp -R plugins/mev15-content-studio/skills/gzh-publish "${CODEX_HOME:-$HOME/.codex}/skills/"
+```
+
+### Claude Code
+
+skills 遵循 SKILL.md 开放标准，同样适用于 Claude Code：
+
+```bash
+mkdir -p ~/.claude/skills
+cp -R plugins/mev15-content-studio/skills/gzh-design ~/.claude/skills/
+cp -R plugins/mev15-content-studio/skills/qing-shiwu-illustrations ~/.claude/skills/
+cp -R plugins/mev15-content-studio/skills/gzh-publish ~/.claude/skills/
 ```
 
 ## 使用示例
@@ -52,6 +68,10 @@ Use $gzh-design 用 AI 清透湖蓝排版 article.md。
 
 ```text
 Use $qing-shiwu-illustrations 处理 article.md，并生成多平台封面。
+```
+
+```text
+Use $gzh-publish 把 article.html 和 cover.jpg 发布到公众号草稿箱，标题《……》。
 ```
 
 ## 更新
@@ -73,5 +93,6 @@ codex plugin add mev15-content-studio@mev15
 
 - `gzh-design` 基于 [`isjiamu/gzh-design-skill`](https://github.com/isjiamu/gzh-design-skill)，按 GNU AGPL-3.0-or-later 发布，并保留原作者声明。
 - `qing-shiwu-illustrations` 基于 Ian Xiaohei Illustrations，保留 MIT License 与 Ian 的署名要求。
+- `gzh-publish` 为本仓库原创组件，按仓库根许可证 GNU AGPL-3.0-or-later 发布。
 
 完整说明见 [NOTICE.md](NOTICE.md) 与 [LICENSES](LICENSES)。仓库根目录的默认许可证为 GNU AGPL-3.0-or-later；各独立组件目录中的许可证继续适用于对应组件。
