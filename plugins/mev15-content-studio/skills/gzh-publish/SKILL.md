@@ -80,9 +80,9 @@ node --experimental-strip-types scripts/publish_draft.ts \
 
 ## 文末公众号名片（尾部片段）
 
-想让每篇文章末尾自动带「公众号名片」卡片：把名片组件存为 `~/.config/gzh-publish/card.html`（和凭据同目录，**不放进仓库**），在同目录 `env` 里配 `GZH_APPEND_HTML=card.html` 即可每篇自动追加，单次可用 `--append-html` 覆盖。
+想让每篇文章末尾自动带「公众号名片」卡片：把本目录的 `card.example.html` 复制为 `~/.config/gzh-publish/card.html`（和凭据同目录）并改成自己账号的字段，在同目录 `env` 里配 `GZH_APPEND_HTML=card.html` 即可每篇自动追加，单次可用 `--append-html` 覆盖。
 
-名片组件模板（编辑器专用标签 `mp-common-profile`）：
+名片组件模板（编辑器专用标签 `mp-common-profile`，真实填写示例见本目录 `card.example.html`）：
 
 ```html
 <section style="margin-top:32px;">
