@@ -1,0 +1,20 @@
+{
+  "name": "mev15",
+  "interface": {
+    "displayName": "Mev15"
+  },
+  "plugins": [
+    {
+      "name": "mev15-content-studio",
+      "source": {
+        "source": "local",
+        "path": "./plugins/mev15-content-studio"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+interface:
+  display_name: "青十五配图与封面"
+  short_description: "生成青十五正文配图与公众号、X、知乎封面"
+  default_prompt: "Use $qing-shiwu-illustrations 处理这篇 Markdown 文章；按标记生成同目录正文配图，或生成公众号头条/次条、X Articles 和知乎封面。"
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,29 @@
+{
+  "name": "mev15-content-studio",
+  "version": "0.1.0",
+  "description": "微信公众号排版与青十五文章配图工具包",
+  "author": {
+    "name": "mev15",
+    "url": "https://github.com/mev15"
+  },
+  "homepage": "https://github.com/mev15/mev15-content-studio",
+  "repository": "https://github.com/mev15/mev15-content-studio",
+  "license": "AGPL-3.0-or-later",
+  "keywords": ["wechat", "markdown", "article-layout", "illustration", "chinese-content"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Mev15 Content Studio",
+    "shortDescription": "公众号排版与青十五文章配图",
+    "longDescription": "把 Markdown 排成可复制到微信公众号的 HTML，并为中文文章生成青十五风格正文配图和多平台封面。",
+    "developerName": "mev15",
+    "category": "Productivity",
+    "capabilities": ["Write"],
+    "websiteURL": "https://github.com/mev15/mev15-content-studio",
+    "brandColor": "#3F73B9",
+    "defaultPrompt": [
+      "用 AI 科技蓝排版这篇 Markdown 公众号文章。",
+      "用 AI 清透湖蓝排版这篇文章，并生成统一预览入口。",
+      "为这篇文章生成青十五风格正文配图和多平台封面。"
+    ]
+  }
+}
