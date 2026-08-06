@@ -21,7 +21,9 @@
 
 同系列默认 03「清晰数字蓝」见 `theme-ai-tech-blue.md`。
 
-正文关键词默认标记：`border-bottom:2px solid #C4DEE8;font-weight:600;`。
+正文关键词默认标记：`border-bottom:2px solid #C4DEE8;font-weight:600;`。自动标记每个正文段落最多 1 处，0 处正常；原文显式 `<u>` / `++` 不计入自动标记配额并须完整保留。
+
+黄色下划线、黄色高亮和有色底卡只映射原文的显式标记或结构（如 `==高亮==`、引用、提示块、表格）；不得仅凭语义自动增加。`#` 一级标题仅作为公众号标题元数据，默认不进入正文；目录、作者区、互动卡和总结区也不得自动生成。同组列表、并列字段和连续编号必须使用一致的颜色、组件和间距。
 
 ## 组件 1 全局容器
 
@@ -238,7 +240,7 @@
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:14px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
       <p style="margin:0 0 8px;"><span style="display:inline-block;font-size:13px;font-weight:700;color:#3E8CB8;background:rgba(62,140,184,0.09);padding:4px 11px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#3E8CB8;border-radius:50%;margin-right:6px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">要点一占位</span></span></p>
-      <p style="margin:0;"><span style="display:inline-block;font-size:13px;font-weight:700;color:#6D9EA7;background:rgba(6,182,212,0.09);padding:4px 11px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#88C5D4;border-radius:50%;margin-right:6px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">要点二占位</span></span></p>
+      <p style="margin:0;"><span style="display:inline-block;font-size:13px;font-weight:700;color:#3E8CB8;background:rgba(62,140,184,0.09);padding:4px 11px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#3E8CB8;border-radius:50%;margin-right:6px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">要点二占位</span></span></p>
     </section>
 ```
 
@@ -291,7 +293,7 @@
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:14px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
       <section style="display:flex;align-items:flex-start;margin-bottom:12px;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#3E8CB8;color:#FFFFFF;font-size:11px;font-weight:700;border-radius:50%;margin-right:10px;flex-shrink:0;"><span leaf="">1</span></span><p style="font-size:14px;color:#455B6B;margin:0;line-height:1.7;"><span leaf="">第一项内容说明占位</span></p></section>
-      <section style="display:flex;align-items:flex-start;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#88C5D4;color:#FFFFFF;font-size:11px;font-weight:700;border-radius:50%;margin-right:10px;flex-shrink:0;"><span leaf="">2</span></span><p style="font-size:14px;color:#455B6B;margin:0;line-height:1.7;"><span leaf="">第二项内容说明占位</span></p></section>
+      <section style="display:flex;align-items:flex-start;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#3E8CB8;color:#FFFFFF;font-size:11px;font-weight:700;border-radius:50%;margin-right:10px;flex-shrink:0;"><span leaf="">2</span></span><p style="font-size:14px;color:#455B6B;margin:0;line-height:1.7;"><span leaf="">第二项内容说明占位</span></p></section>
     </section>
 ```
 
@@ -300,7 +302,7 @@
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:14px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
       <p style="font-size:14px;color:#455B6B;margin:0 0 9px;line-height:1.7;"><span style="color:#3E8CB8;font-weight:900;margin-right:8px;"><span leaf="">●</span></span><span leaf="">并列要点说明占位</span></p>
-      <p style="font-size:14px;color:#455B6B;margin:0;line-height:1.7;"><span style="color:#88C5D4;font-weight:900;margin-right:8px;"><span leaf="">●</span></span><span leaf="">补充要点说明占位</span></p>
+      <p style="font-size:14px;color:#455B6B;margin:0;line-height:1.7;"><span style="color:#3E8CB8;font-weight:900;margin-right:8px;"><span leaf="">●</span></span><span leaf="">补充要点说明占位</span></p>
     </section>
 ```
 
@@ -420,38 +422,40 @@
 
 ## 完整文章模板骨架
 
-默认装配顺序如下，未出现的语义组件直接跳过：
+默认装配顺序如下；只装配原文实际存在的结构，未出现的组件直接跳过：
 
 1. 全局容器。
-2. 「杂志快讯封面·无图」；文章有真实封面图时可改用预览源中的有图变体。
-3. 「横向索引目录」，精选前三个核心章节。
-4. 开头金句用「蓝黄金句卡」。
+2. `#` 一级标题作为公众号标题元数据，默认不放入正文，也不据此自动生成封面卡。
+3. 原文显式 `> 引言` 可用「蓝黄金句卡」；没有引言就不补。
+4. 目录仅在原文已有目录或用户明确要求时使用。
 5. 每个 `##` 依次使用「编号章节标题」，编号为 `01 / 02 / 03…`。
-6. 每章内部按「正文段落 → 奶油黄小节标题 → 步骤/提示/流程/列表/数据/媒体」装配。
-7. 结尾依次使用「作者信息 → 行动引导卡 → 结尾总结区」；作者区只保留一次。
+6. 每章内部严格按原文顺序装配正文、列表、代码、图片、表格和显式提示结构。
+7. 默认不添加作者信息、行动引导卡或结尾总结区；仅在原文已有或用户明确要求时使用。
 
-全篇视觉节奏：白底正文为主，蓝色锚点全文不超过 5 处；正文每段用浅蓝线标记 1–3 个关键词；奶油黄仅用于金句、小节标题和少量注意信息。
+全篇视觉节奏：白底正文为主；自动浅蓝下划线每个正文段落最多 1 处，0 处正常。奶油黄和有色底卡只响应原文显式结构，不根据语义自动增加。
 
 ## 文章类型 → 组件组合配方
 
 | 文章类型 | 核心组件 | 点缀组件 |
 |---|---|---|
-| AI 教程 / 操作指南 | 封面、目录、编号章节、步骤标签、柔灰代码块、数字编号列表 | 实践提示、检查清单、进度状态条 |
-| 工具盘点 / 模型测评 | 封面、目录、胶囊列表、数据表格、蓝色信息框 | 指标摘要卡、成功卡、延伸阅读 |
-| 观点 / 深度分析 | 封面、蓝黄金句卡、编号章节、正文段落 | 暖黄注意卡、节点时间线、结尾总结区 |
-| 数据复盘 / 报告 | 封面、指标摘要卡、数据表格、进度状态条、系统状态面板 | 黄色警告框、时间线、行动引导卡 |
-| 案例实战 / 方法论 | 封面、目录、三步流程卡、步骤标签、编号列表 | 提示词短块、单行命令、检查清单 |
-| AI 新闻 / 模型观察 | 封面、目录、蓝色信息框、节点时间线 | 状态面板、延伸阅读、结尾总结区 |
+| AI 教程 / 操作指南 | 原文已有的编号章节、步骤、代码块、数字列表 | 原文显式提示、检查清单、进度状态 |
+| 工具盘点 / 模型测评 | 原文已有的列表、表格和信息块 | 原文显式指标、状态或延伸阅读 |
+| 观点 / 深度分析 | 原文已有的引言、章节和正文段落 | 原文显式注意事项、时间线或总结 |
+| 数据复盘 / 报告 | 原文已有的指标、表格、进度和状态 | 原文显式警告、时间线或行动项 |
+| 案例实战 / 方法论 | 原文已有的流程、步骤和编号列表 | 原文显式提示词、命令或检查清单 |
+| AI 新闻 / 模型观察 | 原文已有的信息块、时间线和状态 | 原文显式延伸阅读或总结 |
+
+配方只决定“已有内容选哪种组件”，不授权生成封面、目录、副标题、提示语或总结文案。
 
 ## Markdown → AI 清透湖蓝排版映射规则
 
 | Markdown / 语义 | 组件或样式 |
 |---|---|
-| `# 标题` | 杂志快讯封面·无图 |
+| `# 标题` | 仅作为公众号标题元数据，默认不进入正文 |
 | 开头 `> 引言` | 蓝黄金句卡 |
 | `## 章节` | 编号章节标题，顺序生成 `01 / 02 / 03…` |
 | `### 小节` | 奶油黄小节标题；操作步骤用步骤标签 |
-| 普通段落 | 正文段落；每段主动标记 1–3 个关键词 |
+| 普通段落 | 正文段落；自动浅蓝下划线最多 1 处，0 处正常 |
 | `**加粗**` | 主色 `#3E8CB8` 加粗 |
 | `==高亮==` | 浅奶油黄 `#FFF0B5` 背景 |
 | `<u>` / `++文字++` | `border-bottom:2px solid #C4DEE8;font-weight:600;` |
@@ -460,7 +464,7 @@
 | `- 列表` | 圆点无序列表或胶囊列表 |
 | `1. 列表` | 数字编号列表 |
 | Markdown 表格 | 数据表格 |
-| 提示 / 注意 / 风险 | 蓝色实践提示 / 暖黄注意卡 / 黄色警告框 |
-| `![](图片)` | 单图展示；有 alt 时使用带图注图片 |
+| 原文显式提示 / 注意 / 风险 | 蓝色实践提示 / 暖黄注意卡 / 黄色警告框；不得由语义自动新增 |
+| `![](图片)` | 单图展示；非空 alt 按原文逐字排为图注 |
 | FAQ | 常见问题 |
-| 作者与互动 | 作者信息 + 行动引导卡，全文末尾只出现一次 |
+| 作者与互动 | 仅在原文已有或用户明确要求时使用；默认不添加 |

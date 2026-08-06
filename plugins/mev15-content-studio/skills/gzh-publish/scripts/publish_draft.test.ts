@@ -4,7 +4,13 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { extractImageSrcs, classifySrc, replaceImageSrcs, parseEnvFile } from './publish_draft.ts';
+import {
+  extractImageSrcs,
+  classifySrc,
+  replaceImageSrcs,
+  parseEnvFile,
+  selectWechatCoverFiles,
+} from './publish_draft.ts';
 
 test('extractImageSrcs: 双引号/单引号/属性乱序/大小写/去重', () => {
   const html = `
@@ -70,4 +76,40 @@ test('parseEnvFile: 注释/空行/引号/含等号的值/空格', () => {
 
 test('parseEnvFile: 空文本返回空对象', () => {
   assert.deepEqual(parseEnvFile(''), {});
+});
+
+test('selectWechatCoverFiles: 只选公众号两个成品尺寸', () => {
+  assert.deepEqual(selectWechatCoverFiles([
+    'cover-master.png',
+    'cover-x-source.png',
+    'cover-x-article-1920x368.png',
+    'cover-zhihu-1380x560.png',
+    'cover-wechat-secondary-source.png',
+    'cover-wechat-primary-900x383.png',
+    'cover-wechat-secondary-500x500.png',
+  ]), {
+    primary: 'cover-wechat-primary-900x383.png',
+    secondary: 'cover-wechat-secondary-500x500.png',
+  });
+});
+
+test('selectWechatCoverFiles: 任一公众号尺寸缺失则不返回', () => {
+  assert.equal(selectWechatCoverFiles([
+    'cover-wechat-primary-900x383.png',
+    'cover-zhihu-1380x560.png',
+  ]), undefined);
+});
+
+test('selectWechatCoverFiles: canonical 文件优先于其它公众号候选', () => {
+  assert.deepEqual(selectWechatCoverFiles([
+    'wechat-primary-alt.png',
+    'wechat-secondary-alt.png',
+    'cover-wechat-primary-900x383.jpg',
+    'cover-wechat-secondary-500x500.jpg',
+    'cover-wechat-primary-900x383.png',
+    'cover-wechat-secondary-500x500.png',
+  ]), {
+    primary: 'cover-wechat-primary-900x383.png',
+    secondary: 'cover-wechat-secondary-500x500.png',
+  });
 });

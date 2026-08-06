@@ -6,3 +6,8 @@ output/
 .env
 .env.*
 !.env.example
+
+# gzh-publish 本地账号状态；公开模板 env.example/card.example.html 仍可跟踪
+plugins/*/skills/gzh-publish/env
+plugins/*/skills/gzh-publish/card.html
+plugins/*/skills/gzh-publish/*.log

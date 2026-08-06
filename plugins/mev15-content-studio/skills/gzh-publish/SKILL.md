@@ -1,6 +1,6 @@
 ---
 name: gzh-publish
-description: 把排版好的微信公众号 HTML（正文配图为图床外链）和封面图一键同步到公众号草稿箱：自动下载正文外链图片、上传到微信素材库并替换为微信 CDN 链接，封面上传为永久素材，最后创建草稿。直连微信官方 API（AppID/AppSecret + IP 白名单），零第三方服务、零 npm 依赖。触发场景：(1) 用户说"发到草稿箱""同步到公众号""上传公众号素材/封面"，(2) gzh-design 排版完成后要推送到公众号，(3) 用户给出成品 HTML 和封面图要求发布。只创建草稿，绝不群发或正式发布；不做排版（排版用 gzh-design）。
+description: 把排版好的微信公众号 HTML（正文配图为图床外链）一键同步到公众号草稿箱：自动下载正文外链图片、替换为微信 CDN；未指定封面时从原文同名目录自动选择公众号头条与次条两个尺寸并上传永久素材；最后创建草稿。直连微信官方 API（AppID/AppSecret + IP 白名单），零第三方服务、零 npm 依赖。触发场景：(1) 用户说"发到草稿箱""同步到公众号""上传公众号素材/封面"，(2) gzh-design 排版完成后要推送到公众号，(3) 用户给出成品 HTML 或封面要求发布。只创建草稿，绝不群发或正式发布；不做排版（排版用 gzh-design）。
 ---
 
 # 公众号草稿发布 Skill
@@ -8,7 +8,7 @@ description: 把排版好的微信公众号 HTML（正文配图为图床外链�
 把一篇**已经排版好**的公众号 HTML（例如 `gzh-design` 的排版产物）连同封面图发布到微信公众号**草稿箱**。脚本会：
 
 1. 扫描 HTML 中所有 `<img>` 的图床外链，逐张下载并调用微信 `media/uploadimg` 上传（不占素材库 10 万张配额），把外链替换为微信 CDN（`mmbiz.qpic.cn`）链接——**微信会过滤正文里的非微信域图片，这一步是必须的**；
-2. 封面图调用 `material/add_material` 上传为永久素材，取得 `thumb_media_id`；
+2. 未指定封面时，在原文同目录的同名目录下查找 `covers/`，只选择公众号头条 `900×383` 与次条 `500×500` 两张成品并调用 `material/add_material` 上传为永久素材；头条图的 `media_id` 用作草稿 `thumb_media_id`；
 3. 调用 `draft/add` 创建草稿，输出草稿 `media_id`。
 
 全程只调 `api.weixin.qq.com` 官方接口，内容与凭据不经过任何第三方。
@@ -36,7 +36,6 @@ chmod 600 ~/.config/gzh-publish/env
 ```bash
 node --experimental-strip-types scripts/publish_draft.ts \
   --html output/preview/my-article/article.html \
-  --cover covers/wechat-main.jpg \
   --title "文章标题" \
   --dry-run
 ```
@@ -46,7 +45,6 @@ node --experimental-strip-types scripts/publish_draft.ts \
 ```bash
 node --experimental-strip-types scripts/publish_draft.ts \
   --html output/preview/my-article/article.html \
-  --cover covers/wechat-main.jpg \
   --title "文章标题" \
   --author "作者名" \
   --digest "可选摘要，不给则微信自动截取正文前 54 字" \
@@ -58,7 +56,9 @@ node --experimental-strip-types scripts/publish_draft.ts \
 | 参数 | 必填 | 说明 |
 |---|---|---|
 | `--html` | ✅ | 排版产物 HTML 文件路径（正文片段，**不是** preview 包裹的完整页面） |
-| `--cover` | ✅ | 封面图本地路径（jpg/png，微信头条封面建议 2.35:1） |
+| `--cover` | | 显式指定公众号头条封面（jpg/png）；省略时自动发现两张公众号封面 |
+| `--secondary-cover` | | 显式指定公众号次条封面；只能和 `--cover` 一起使用 |
+| `--article` | | 原文 Markdown 路径；自动发现封面但存在多份同名原文时用它消歧 |
 | `--title` | ✅ | 草稿标题（≤ 64 字） |
 | `--author` | | 作者名 |
 | `--digest` | | 摘要；省略则微信自动截取 |
@@ -66,10 +66,21 @@ node --experimental-strip-types scripts/publish_draft.ts \
 | `--append-html` | | 发布前追加到正文末尾的 HTML 片段文件（如公众号名片，见下节），相对路径相对当前目录；不传时读配置 `GZH_APPEND_HTML`（相对路径相对 `~/.config/gzh-publish/`），两者都无则不追加 |
 | `--dry-run` | | 只解析并打印计划，不调用微信 API |
 
+## 封面自动发现
+
+用户未传 `--cover` 时：
+
+1. 从 `--title` 和排版 HTML 文件名推断原文名，在当前 workspace 找到对应 Markdown；多份同名原文时停止并要求传 `--article`。
+2. 进入 `<article-dir>/<article-stem>/covers/`。
+3. 只选择公众号头条 `cover-wechat-primary-900x383.(png|jpg)` 和次条 `cover-wechat-secondary-500x500.(png|jpg)`；忽略 `cover-master`、`*-source`、X、知乎和其它平台封面。
+4. 两张都上传为永久图片素材；头条图用于本篇草稿，次条图仅预存到素材库供后续次条使用。微信永久素材 API 不提供文件夹归类参数，因此只能上传到图片素材库，无法通过 API 指定后台文件夹。
+
+用户传了 `--cover` 时沿用显式路径，只上传该头条图；需要同时预存次条图时再传 `--secondary-cover`。
+
 ## 与本 plugin 其他 skill 的衔接
 
 - `gzh-design` 排版 → 拿它输出的**排版 HTML 片段**（可直接粘贴公众号编辑器的那份，不是 `output/preview/` 里带 `<html>` 骨架的预览页；误传预览页脚本会给出警告）。
-- `qing-shiwu-illustrations` 生成的封面 → 作为 `--cover` 传入；正文配图若已上传图床并写进 HTML，将被自动搬运到微信素材库。
+- `qing-shiwu-illustrations` 生成的封面 → 默认按其标准目录和文件名自动发现，无需再传 `--cover`；正文配图若已上传图床并写进 HTML，将被自动搬运到微信素材库。
 
 ## 图片处理规则
 
@@ -77,6 +88,7 @@ node --experimental-strip-types scripts/publish_draft.ts \
 - 已是微信域的链接 → 原样保留，跳过。
 - `data:` URI、相对路径、本地路径 → 跳过并警告（请先传图床或改为外链）。
 - `uploadimg` 仅支持 **jpg/png、单张 ≤ 1MB**；GIF 与超限图片会警告跳过（保留原链接，微信端会过滤，需手工处理）。
+- 自动封面发现只上传公众号头条与次条成品，不上传母版、重排 source、X 或知乎封面。
 
 ## 文末公众号名片（尾部片段）
 
