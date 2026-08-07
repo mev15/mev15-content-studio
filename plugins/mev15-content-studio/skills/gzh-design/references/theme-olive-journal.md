@@ -49,7 +49,7 @@
 ## 组件 1 全局容器
 
 ```html
-<section style="max-width:677px;margin:0 auto;padding:8px;box-sizing:border-box;background:#fdfdf8;color:#4d4f46;font-family:'IBM Plex Sans',-apple-system,system-ui,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;line-height:1.75;">
+<section style="max-width:677px;margin:0 auto;padding:8px;box-sizing:border-box;background:#fdfdf8;line-height:1.75;">
 
   <!-- 所有组件放在这里，第一个子元素是组件 2 头图卡，其余组件均自带 margin-top:24px -->
 
@@ -879,7 +879,7 @@
 ## 完整文章模板骨架
 
 ```html
-<section style="max-width:677px;margin:0 auto;padding:8px;box-sizing:border-box;background:#fdfdf8;color:#4d4f46;font-family:'IBM Plex Sans',-apple-system,system-ui,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;line-height:1.75;">
+<section style="max-width:677px;margin:0 auto;padding:8px;box-sizing:border-box;background:#fdfdf8;line-height:1.75;">
 
   <!-- 1. 头图卡（组件2 hero-card，唯一一处，不设 margin-top） -->
 

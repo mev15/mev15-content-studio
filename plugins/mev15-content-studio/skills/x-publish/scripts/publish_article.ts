@@ -66,8 +66,9 @@ interface InlineResult { text: string; styles: StyleRange[]; links: { offset: nu
 export function parseInline(src: string): InlineResult {
   const out: InlineResult = { text: '', styles: [], links: [] };
   // 按出现位置取最早的 token；同位置按数组顺序（code 最优先，避免代码里的 * 被解析）
-  const patterns: { re: RegExp; kind: 'code' | 'bold' | 'strike' | 'link' | 'img' | 'italic' }[] = [
+  const patterns: { re: RegExp; kind: 'code' | 'highlight' | 'bold' | 'strike' | 'link' | 'img' | 'italic' }[] = [
     { re: /`([^`]+)`/, kind: 'code' },
+    { re: /==([^=\n]+)==/, kind: 'highlight' },
     { re: /\*\*((?:[^*]|\*(?!\*))+)\*\*/, kind: 'bold' },
     { re: /~~([^~]+)~~/, kind: 'strike' },
     { re: /!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/, kind: 'img' },
@@ -98,7 +99,7 @@ export function parseInline(src: string): InlineResult {
       out.text += inner.text;
       for (const s of inner.styles) out.styles.push({ ...s, offset: s.offset + start });
       for (const l of inner.links) out.links.push({ ...l, offset: l.offset + start });
-      const style = best.kind === 'bold' ? 'bold' : best.kind === 'strike' ? 'strikethrough' : 'italic';
+      const style = best.kind === 'bold' || best.kind === 'highlight' ? 'bold' : best.kind === 'strike' ? 'strikethrough' : 'italic';
       out.styles.push({ offset: start, length: inner.text.length, style });
     }
     rest = rest.slice(best.m.index + best.m[0].length);
@@ -170,9 +171,16 @@ function pushTable(plan: ContentPlan, rows: string[][]): void {
   }
 }
 
-/** 代码块 → 整块 blockquote（X 无代码块类型；块内保留换行） */
-function pushCodeBlock(plan: ContentPlan, code: string): void {
-  plan.blocks.push({ text: code.replace(/\n+$/, ''), type: 'blockquote' });
+/** 围栏代码 → X 原生 markdown atomic entity（保留语言与换行） */
+function pushCodeBlock(plan: ContentPlan, code: string, fenceInfo = ''): void {
+  const language = fenceInfo.trim().split(/\s+/, 1)[0].replace(/[^A-Za-z0-9_+.-]/g, '');
+  const markdown = `\`\`\`${language}\n${code.replace(/\n+$/, '')}\n\`\`\``;
+  const key = plan.entities.length;
+  plan.entities.push({
+    key: String(key),
+    value: { type: 'markdown', mutability: 'mutable', data: { markdown } },
+  });
+  plan.blocks.push({ text: ' ', type: 'atomic', entity_ranges: [{ key, offset: 0, length: 1 }] });
 }
 
 /** markdown 正文 → 内容计划（图片留占位，发布期物化） */
@@ -185,10 +193,13 @@ export function mdToPlan(md: string, opts: { title?: string } = {}): ContentPlan
   let para: string[] = [];
   let quote: string[] = [];
   let table: string[][] = [];
-  let inCode = false; let codeLines: string[] = [];
+  let inCode = false; let codeLines: string[] = []; let codeFenceInfo = '';
 
   const flushPara = () => {
-    if (para.length) { pushTextBlock(plan, 'unstyled', para.join(' ')); para = []; }
+    if (para.length) {
+      for (const raw of para) pushTextBlock(plan, 'unstyled', raw);
+      para = [];
+    }
   };
   const flushQuote = () => {
     if (quote.length) { pushTextBlock(plan, 'blockquote', quote.join(' ')); quote = []; }
@@ -202,11 +213,16 @@ export function mdToPlan(md: string, opts: { title?: string } = {}): ContentPlan
     const s = line.trim();
 
     if (inCode) {
-      if (s.startsWith('```')) { inCode = false; pushCodeBlock(plan, codeLines.join('\n')); codeLines = []; }
+      if (s.startsWith('```')) {
+        inCode = false;
+        pushCodeBlock(plan, codeLines.join('\n'), codeFenceInfo);
+        codeLines = [];
+        codeFenceInfo = '';
+      }
       else codeLines.push(line);
       continue;
     }
-    if (s.startsWith('```')) { flushAll(); inCode = true; continue; }
+    if (s.startsWith('```')) { flushAll(); inCode = true; codeFenceInfo = s.slice(3).trim(); continue; }
 
     if (!s) { flushAll(); continue; }
 
@@ -264,7 +280,7 @@ export function mdToPlan(md: string, opts: { title?: string } = {}): ContentPlan
 
     para.push(s);
   }
-  if (inCode && codeLines.length) { pushCodeBlock(plan, codeLines.join('\n')); }
+  if (inCode && codeLines.length) { pushCodeBlock(plan, codeLines.join('\n'), codeFenceInfo); }
   flushAll();
   return plan;
 }

@@ -54,7 +54,7 @@
 ## 组件 1 全局容器
 
 ```html
-<section style="max-width:677px;margin:0 auto;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:#374151;line-height:1.75;letter-spacing:0.5px;overflow-x:hidden;">
+<section style="max-width:677px;margin:0 auto;background:#ffffff;line-height:1.75;letter-spacing:0.5px;overflow-x:hidden;">
 
   <!-- 所有组件放在这里 -->
 
@@ -840,7 +840,7 @@
 ## 完整文章模板骨架
 
 ```html
-<section style="max-width:677px;margin:0 auto;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:#374151;line-height:1.75;letter-spacing:0.5px;overflow-x:hidden;">
+<section style="max-width:677px;margin:0 auto;background:#ffffff;line-height:1.75;letter-spacing:0.5px;overflow-x:hidden;">
 
   <!-- 1. 封面（组件2 cover-breaking，有图/无图二选一） -->
 

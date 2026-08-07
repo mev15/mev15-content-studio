@@ -16,7 +16,7 @@
 | 奶油黄 | `#F6D46B` | 金句下划线、暖色提示、少量装饰 |
 | 浅奶油黄 | `#FFF0B5` | 小节标题高亮 |
 | 标题色 | `#34495A` | 文章标题、章节标题 |
-| 正文色 | `#455B6B` | 正文与说明文字 |
+| 正文色 | 继承公众号默认（亮色约 `#191919`） | 普通正文不写 `color` |
 | 页面背景 | `#FBFCFD` | 全局近白背景 |
 
 同系列 05「清透湖蓝」变量：主色 `#3E8CB8`、次主色 `#5FA5C5`、浅青强调 `#88C5D4`、浅蓝线 `#C4DEE8`、浅蓝底 `#E8F5F8`；完整组件见 `theme-ai-lake-blue.md`。
@@ -28,7 +28,7 @@
 ## 组件 1 全局容器
 
 ```html
-<section style="max-width:677px;margin:0 auto;background:#FBFCFD;color:#455B6B;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;line-height:1.8;padding:0 0 24px;">
+<section style="max-width:677px;margin:0 auto;background:#FBFCFD;line-height:1.8;padding:0 0 24px;">
   <span leaf="">{{文章正文组件}}</span>
 </section>
 ```
@@ -97,14 +97,12 @@
     </section>
 ```
 
-#### 奶油黄小节标题
+#### 蓝色左竖线小节标题
 
 ```html
-<section style="margin:0 0 18px;background:#FFFFFF;border-radius:16px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <p style="font-size:15px;font-weight:900;color:#34495A;margin:0;">
-        <span style="background:#FFF0B5;border-radius:3px;padding:0 4px;"><span leaf="">小节标题占位</span></span>
-      </p>
-    </section>
+<p style="margin:28px 0 14px;font-size:16px;font-weight:800;color:#34495A;line-height:1.5;border-left:4px solid #3F73B9;padding-left:12px;">
+      <span leaf="">小节标题占位</span>
+    </p>
 ```
 
 #### 步骤标签
@@ -115,7 +113,7 @@
         <span style="background:#3F73B9;color:#FFFFFF;font-size:10px;font-weight:700;padding:3px 9px;border-radius:12px;margin-right:8px;"><span leaf="">STEP 01</span></span>
         <span style="font-size:15px;font-weight:800;color:#34495A;"><span leaf="">步骤标题占位</span></span>
       </section>
-      <p style="font-size:14px;margin:0;color:#617484;line-height:1.9;"><span leaf="">步骤说明文字占位，用于展示操作顺序与重点信息。</span></p>
+      <p style="font-size:16px;margin:0;line-height:1.9;"><span leaf="">步骤说明文字占位，用于展示操作顺序与重点信息。</span></p>
     </section>
 ```
 
@@ -125,7 +123,7 @@
 
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:16px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <p style="font-size:14px;line-height:1.9;text-align:justify;margin:0;color:#455B6B;"><span leaf="">正文说明文字占位。段落中的 </span><span style="border-bottom:2px solid #C2D8EA;font-weight:600;"><span leaf="">核心观点占位</span></span><span leaf=""> 使用浅蓝下划线标记，</span><strong style="color:#3F73B9;"><span leaf="">关键结论占位</span></strong><span leaf=""> 使用主色加粗。</span></p>
+      <p style="font-size:16px;line-height:1.9;text-align:justify;margin:0;"><span leaf="">正文说明文字占位。段落中的 </span><span style="border-bottom:2px solid #C2D8EA;font-weight:600;"><span leaf="">核心观点占位</span></span><span leaf=""> 使用浅蓝下划线标记，</span><strong style="color:#3F73B9;"><span leaf="">关键结论占位</span></strong><span leaf=""> 使用主色加粗。</span></p>
     </section>
 ```
 
@@ -133,7 +131,7 @@
 
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:16px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <p style="font-size:14px;line-height:2.2;margin:0;color:#455B6B;">
+      <p style="font-size:16px;line-height:2.2;margin:0;">
         <strong style="color:#3F73B9;"><span leaf="">主色加粗</span></strong>　
         <span style="color:#3F73B9;background:rgba(63,115,185,0.10);padding:2px 5px;border-radius:3px;font-weight:700;"><span leaf="">蓝底标签</span></span>　
         <span style="background:#FFF0B5;padding:0 4px;font-weight:600;color:#34495A;"><span leaf="">奶油黄高亮</span></span>　
@@ -146,7 +144,7 @@
 
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:16px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <p style="font-size:13px;color:#455B6B;margin:0;line-height:1.8;">
+      <p style="font-size:13px;margin:0;line-height:1.8;">
         <span style="display:inline-block;background:#3F73B9;color:#FFFFFF;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-right:7px;letter-spacing:0.5px;"><span leaf="">PROMPT</span></span>
         <span style="font-size:12px;color:#6F8291;font-weight:700;"><span leaf="">提示词结构说明占位</span></span>
       </p>
@@ -157,9 +155,9 @@
 
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:16px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <p style="font-size:13px;color:#455B6B;margin:0;line-height:1.8;">
+      <p style="font-size:13px;margin:0;line-height:1.8;">
         <span style="display:inline-block;background:#6F8291;color:#FFFFFF;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-right:7px;"><span leaf="">CMD</span></span>
-        <code style="background:#F3F6F8;color:#455B6B;padding:3px 7px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">command --example value</span></code>
+        <code style="background:#F3F6F8;padding:3px 7px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">command --example value</span></code>
       </p>
     </section>
 ```
@@ -169,7 +167,7 @@
 ```html
 <section style="margin:0 0 18px;background:#F7FAFC;border-radius:14px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.07);border:1px solid #D8E2E8;">
       <p style="font-size:12px;color:#3F73B9;margin:0;line-height:1.7;font-family:monospace;"><span leaf="">const structure = {</span></p>
-      <p style="font-size:12px;color:#455B6B;margin:0;line-height:1.7;font-family:monospace;"><span leaf="">　title: '示例结构',</span></p>
+      <p style="font-size:12px;margin:0;line-height:1.7;font-family:monospace;"><span leaf="">　title: '示例结构',</span></p>
       <p style="font-size:12px;color:#B88922;margin:0;line-height:1.7;font-family:monospace;"><span leaf="">　status: 'ready'</span></p>
       <p style="font-size:12px;color:#3F73B9;margin:0;line-height:1.7;font-family:monospace;"><span leaf="">};</span></p>
     </section>
@@ -199,7 +197,7 @@
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:14px;padding:16px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
       <p style="font-size:12px;font-weight:700;color:#3F73B9;letter-spacing:1px;margin:0 0 6px;"><span leaf="">✦ 实践提示</span></p>
-      <p style="font-size:13px;color:#455B6B;margin:0;line-height:1.7;"><span leaf="">可直接行动的建议与方法说明占位。</span></p>
+      <p style="font-size:13px;margin:0;line-height:1.7;"><span leaf="">可直接行动的建议与方法说明占位。</span></p>
     </section>
 ```
 
@@ -215,7 +213,7 @@
 
 ```html
 <section style="margin:0 0 18px;background:#EAF3F8;border:1px solid #DCEAF5;border-radius:8px;padding:16px 18px;box-sizing:border-box;">
-      <p style="font-size:13px;color:#455B6B;margin:0;line-height:1.7;text-align:justify;"><span leaf="">背景信息、概念说明或补充资料占位。</span></p>
+      <p style="font-size:13px;margin:0;line-height:1.7;text-align:justify;"><span leaf="">背景信息、概念说明或补充资料占位。</span></p>
     </section>
 ```
 
@@ -292,8 +290,9 @@
 
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:14px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <section style="display:flex;align-items:flex-start;margin-bottom:12px;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#3F73B9;color:#FFFFFF;font-size:11px;font-weight:700;border-radius:50%;margin-right:10px;flex-shrink:0;"><span leaf="">1</span></span><p style="font-size:14px;color:#455B6B;margin:0;line-height:1.7;"><span leaf="">第一项内容说明占位</span></p></section>
-      <section style="display:flex;align-items:flex-start;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#3F73B9;color:#FFFFFF;font-size:11px;font-weight:700;border-radius:50%;margin-right:10px;flex-shrink:0;"><span leaf="">2</span></span><p style="font-size:14px;color:#455B6B;margin:0;line-height:1.7;"><span leaf="">第二项内容说明占位</span></p></section>
+      <p style="font-size:16px;margin:0 0 12px;line-height:1.8;"><span leaf="">列表引导句占位：</span></p>
+      <section style="display:flex;align-items:flex-start;margin-bottom:12px;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#3F73B9;color:#FFFFFF;font-size:11px;font-weight:700;border-radius:50%;margin-right:10px;flex-shrink:0;"><span leaf="">1</span></span><p style="font-size:16px;margin:0;line-height:1.7;"><span leaf="">第一项内容说明占位</span></p></section>
+      <section style="display:flex;align-items:flex-start;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#3F73B9;color:#FFFFFF;font-size:11px;font-weight:700;border-radius:50%;margin-right:10px;flex-shrink:0;"><span leaf="">2</span></span><p style="font-size:16px;margin:0;line-height:1.7;"><span leaf="">第二项内容说明占位</span></p></section>
     </section>
 ```
 
@@ -301,16 +300,19 @@
 
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:14px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <p style="font-size:14px;color:#455B6B;margin:0 0 9px;line-height:1.7;"><span style="color:#3F73B9;font-weight:900;margin-right:8px;"><span leaf="">●</span></span><span leaf="">并列要点说明占位</span></p>
-      <p style="font-size:14px;color:#455B6B;margin:0;line-height:1.7;"><span style="color:#3F73B9;font-weight:900;margin-right:8px;"><span leaf="">●</span></span><span leaf="">补充要点说明占位</span></p>
+      <p style="font-size:16px;margin:0 0 12px;line-height:1.8;"><span leaf="">列表引导句占位：</span></p>
+      <p style="font-size:16px;margin:0 0 9px;line-height:1.7;"><span style="color:#3F73B9;font-weight:900;margin-right:8px;"><span leaf="">●</span></span><span leaf="">并列要点说明占位</span></p>
+      <p style="font-size:16px;margin:0;line-height:1.7;"><span style="color:#3F73B9;font-weight:900;margin-right:8px;"><span leaf="">●</span></span><span leaf="">补充要点说明占位</span></p>
     </section>
 ```
+
+列表引导句仅在原文列表前紧邻一个以冒号结尾的段落时保留，并与整组列表共用同一外层 `<section>`；原文没有引导句时删掉该段，不得生成占位文字。后接图片、代码或新标题的冒号段落不按此规则强制合并。
 
 #### 任务检查清单
 
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:14px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <section style="display:flex;align-items:center;margin-bottom:10px;"><span style="width:18px;height:18px;border-radius:5px;background:#3F73B9;color:#FFFFFF;font-size:12px;text-align:center;line-height:18px;margin-right:9px;"><span leaf="">✓</span></span><span style="font-size:14px;color:#455B6B;"><span leaf="">已完成事项占位</span></span></section>
+      <section style="display:flex;align-items:center;margin-bottom:10px;"><span style="width:18px;height:18px;border-radius:5px;background:#3F73B9;color:#FFFFFF;font-size:12px;text-align:center;line-height:18px;margin-right:9px;"><span leaf="">✓</span></span><span style="font-size:14px;"><span leaf="">已完成事项占位</span></span></section>
       <section style="display:flex;align-items:center;"><span style="width:18px;height:18px;border-radius:5px;border:1px solid #C2CCD3;background:#FFFFFF;margin-right:9px;"><span leaf=""><br></span></span><span style="font-size:14px;color:#6F8291;"><span leaf="">待确认事项占位</span></span></section>
     </section>
 ```
@@ -331,7 +333,7 @@
 
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:14px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <section style="display:flex;justify-content:space-between;margin-bottom:7px;"><span style="font-size:13px;color:#455B6B;font-weight:700;"><span leaf="">阶段进度占位</span></span><span style="font-size:12px;color:#3F73B9;font-weight:700;"><span leaf="">示例比例</span></span></section>
+      <section style="display:flex;justify-content:space-between;margin-bottom:7px;"><span style="font-size:13px;font-weight:700;"><span leaf="">阶段进度占位</span></span><span style="font-size:12px;color:#3F73B9;font-weight:700;"><span leaf="">示例比例</span></span></section>
       <section style="height:8px;background:#E4EAED;border-radius:999px;overflow:hidden;"><span style="display:block;width:72%;height:8px;background:#82B6D3;border-radius:999px;"><span leaf=""><br></span></span></section>
     </section>
 ```
@@ -340,8 +342,8 @@
 
 ```html
 <section style="margin:0 0 18px;background:#F7FAFC;border:1px solid #DCEAF5;border-radius:14px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <section style="display:flex;align-items:center;margin-bottom:10px;"><span style="width:8px;height:8px;background:#9BC9CF;border-radius:50%;margin-right:9px;"><span leaf=""><br></span></span><span style="font-size:13px;color:#455B6B;font-weight:700;"><span leaf="">状态信息占位</span></span><span style="font-size:10px;color:#3F73B9;margin-left:auto;"><span leaf="">READY</span></span></section>
-      <section style="display:flex;align-items:center;"><span style="width:8px;height:8px;background:#F6D46B;border-radius:50%;margin-right:9px;"><span leaf=""><br></span></span><span style="font-size:13px;color:#455B6B;font-weight:700;"><span leaf="">节点信息占位</span></span><span style="font-size:10px;color:#B88922;margin-left:auto;"><span leaf="">CHECK</span></span></section>
+      <section style="display:flex;align-items:center;margin-bottom:10px;"><span style="width:8px;height:8px;background:#9BC9CF;border-radius:50%;margin-right:9px;"><span leaf=""><br></span></span><span style="font-size:13px;font-weight:700;"><span leaf="">状态信息占位</span></span><span style="font-size:10px;color:#3F73B9;margin-left:auto;"><span leaf="">READY</span></span></section>
+      <section style="display:flex;align-items:center;"><span style="width:8px;height:8px;background:#F6D46B;border-radius:50%;margin-right:9px;"><span leaf=""><br></span></span><span style="font-size:13px;font-weight:700;"><span leaf="">节点信息占位</span></span><span style="font-size:10px;color:#B88922;margin-left:auto;"><span leaf="">CHECK</span></span></section>
     </section>
 ```
 
@@ -428,10 +430,10 @@
 2. 原文开头有 `> 引言` 时使用「蓝黄金句卡」；普通首段不得改写成引言。
 3. 原文已有目录或用户明确要求时使用「横向索引目录」，目录文字逐字取自原文标题。
 4. 每个 `##` 依次使用「编号章节标题」，编号为 `01 / 02 / 03…`。
-5. 每章按原顺序装配正文、`###`、列表、代码、表格和图片；提示/流程/状态卡仅映射显式结构。
+5. 每章按原顺序装配正文、`###`、列表、代码、表格和图片；冒号结尾且紧接列表的引导句并入列表容器；提示/流程/状态卡仅映射显式结构。
 6. 原文已有作者、互动或总结内容时才使用对应收束组件；不生成占位作者、CTA 或结尾总结。
 
-全篇视觉节奏：白底正文为主，原文显式强调优先；自动浅蓝下划线每段 0–1 处。黄色强调和彩色底卡不做语义推断，只处理原文明示结构。同组列表、编号、圆点和胶囊统一使用主色，不做首项深、后续浅的变化。
+全篇视觉节奏：白底正文为主，原文显式强调优先；自动浅蓝下划线每段 0–1 处。黄色强调和彩色底卡不做语义推断，只处理原文明示结构。小节标题使用蓝色左竖线，与奶油黄行内高亮明确分层。同组列表、编号、圆点和胶囊统一使用主色，不做首项深、后续浅的变化。
 
 ## 文章类型 → 组件组合配方
 
@@ -453,17 +455,17 @@
 | `# 标题` | 仅作为公众号标题/文件名元数据，默认不进入正文 |
 | 开头 `> 引言` | 蓝黄金句卡 |
 | `## 章节` | 编号章节标题，顺序生成 `01 / 02 / 03…` |
-| `### 小节` | 奶油黄小节标题；操作步骤用步骤标签 |
+| `### 小节` | 蓝色左竖线小节标题；操作步骤用步骤标签；不得复用奶油黄行内高亮样式 |
 | 普通段落 | 正文段落；显式标记优先，自动浅蓝下划线每段最多 1 处 |
 | `**加粗**` | 主色 `#3F73B9` 加粗 |
 | `==高亮==` | 浅奶油黄 `#FFF0B5` 背景 |
 | `<u>` / `++文字++` | `border-bottom:2px solid #C2D8EA;font-weight:600;` |
 | 行内代码 | 中性浅灰底 + 主色文字；优先参考通用增量库 1c |
 | 围栏代码块 | 柔灰代码块；复杂多行代码优先参考通用增量库 1a / 1b |
-| `- 列表` | 圆点无序列表或胶囊列表 |
-| `1. 列表` | 数字编号列表 |
+| `- 列表` | 圆点无序列表或胶囊列表；紧邻的冒号引导句并入同一外层容器 |
+| `1. 列表` | 数字编号列表；紧邻的冒号引导句并入同一外层容器 |
 | Markdown 表格 | 数据表格 |
 | 显式提示 / 注意 / 风险 callout | 蓝色实践提示 / 暖黄注意卡 / 黄色警告框；不得从普通段落语义推断 |
-| `![alt](图片)` | 单图展示；非空 alt 原样排成图注，空 alt 不编造 |
+| `![alt](图片)` | 单图展示；非空 alt 原样排成图注且不添加 `—`、`图：` 等前缀，空 alt 不编造 |
 | 原文显式 FAQ | 常见问题 |
 | 原文作者与互动 / 用户明确要求 | 作者信息或行动引导卡；否则不生成、不留占位 |

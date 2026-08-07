@@ -16,7 +16,7 @@
 | 奶油黄 | `#F6D46B` | 金句下划线、暖色提示、少量装饰 |
 | 浅奶油黄 | `#FFF0B5` | 小节标题高亮 |
 | 标题色 | `#34495A` | 文章标题、章节标题 |
-| 正文色 | `#455B6B` | 正文与说明文字 |
+| 正文色 | 继承公众号默认（亮色约 `#191919`） | 普通正文不写 `color` |
 | 页面背景 | `#FBFCFD` | 全局近白背景 |
 
 同系列默认 03「清晰数字蓝」见 `theme-ai-tech-blue.md`。
@@ -28,7 +28,7 @@
 ## 组件 1 全局容器
 
 ```html
-<section style="max-width:677px;margin:0 auto;background:#FBFCFD;color:#455B6B;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;line-height:1.8;padding:0 0 24px;">
+<section style="max-width:677px;margin:0 auto;background:#FBFCFD;line-height:1.8;padding:0 0 24px;">
   <span leaf="">{{文章正文组件}}</span>
 </section>
 ```
@@ -115,7 +115,7 @@
         <span style="background:#3E8CB8;color:#FFFFFF;font-size:10px;font-weight:700;padding:3px 9px;border-radius:12px;margin-right:8px;"><span leaf="">STEP 01</span></span>
         <span style="font-size:15px;font-weight:800;color:#34495A;"><span leaf="">步骤标题占位</span></span>
       </section>
-      <p style="font-size:14px;margin:0;color:#617484;line-height:1.9;"><span leaf="">步骤说明文字占位，用于展示操作顺序与重点信息。</span></p>
+      <p style="font-size:16px;margin:0;line-height:1.9;"><span leaf="">步骤说明文字占位，用于展示操作顺序与重点信息。</span></p>
     </section>
 ```
 
@@ -125,7 +125,7 @@
 
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:16px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <p style="font-size:14px;line-height:1.9;text-align:justify;margin:0;color:#455B6B;"><span leaf="">正文说明文字占位。段落中的 </span><span style="border-bottom:2px solid #C4DEE8;font-weight:600;"><span leaf="">核心观点占位</span></span><span leaf=""> 使用浅蓝下划线标记，</span><strong style="color:#3E8CB8;"><span leaf="">关键结论占位</span></strong><span leaf=""> 使用主色加粗。</span></p>
+      <p style="font-size:16px;line-height:1.9;text-align:justify;margin:0;"><span leaf="">正文说明文字占位。段落中的 </span><span style="border-bottom:2px solid #C4DEE8;font-weight:600;"><span leaf="">核心观点占位</span></span><span leaf=""> 使用浅蓝下划线标记，</span><strong style="color:#3E8CB8;"><span leaf="">关键结论占位</span></strong><span leaf=""> 使用主色加粗。</span></p>
     </section>
 ```
 
@@ -133,7 +133,7 @@
 
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:16px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <p style="font-size:14px;line-height:2.2;margin:0;color:#455B6B;">
+      <p style="font-size:16px;line-height:2.2;margin:0;">
         <strong style="color:#3E8CB8;"><span leaf="">主色加粗</span></strong>　
         <span style="color:#3E8CB8;background:rgba(62,140,184,0.10);padding:2px 5px;border-radius:3px;font-weight:700;"><span leaf="">蓝底标签</span></span>　
         <span style="background:#FFF0B5;padding:0 4px;font-weight:600;color:#34495A;"><span leaf="">奶油黄高亮</span></span>　
@@ -146,7 +146,7 @@
 
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:16px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <p style="font-size:13px;color:#455B6B;margin:0;line-height:1.8;">
+      <p style="font-size:13px;margin:0;line-height:1.8;">
         <span style="display:inline-block;background:#3E8CB8;color:#FFFFFF;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-right:7px;letter-spacing:0.5px;"><span leaf="">PROMPT</span></span>
         <span style="font-size:12px;color:#6F8291;font-weight:700;"><span leaf="">提示词结构说明占位</span></span>
       </p>
@@ -157,9 +157,9 @@
 
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:16px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <p style="font-size:13px;color:#455B6B;margin:0;line-height:1.8;">
+      <p style="font-size:13px;margin:0;line-height:1.8;">
         <span style="display:inline-block;background:#6F8291;color:#FFFFFF;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-right:7px;"><span leaf="">CMD</span></span>
-        <code style="background:#F3F6F8;color:#455B6B;padding:3px 7px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">command --example value</span></code>
+        <code style="background:#F3F6F8;padding:3px 7px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">command --example value</span></code>
       </p>
     </section>
 ```
@@ -169,7 +169,7 @@
 ```html
 <section style="margin:0 0 18px;background:#F7FAFC;border-radius:14px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.07);border:1px solid #D8E2E8;">
       <p style="font-size:12px;color:#3E8CB8;margin:0;line-height:1.7;font-family:monospace;"><span leaf="">const structure = {</span></p>
-      <p style="font-size:12px;color:#455B6B;margin:0;line-height:1.7;font-family:monospace;"><span leaf="">　title: '示例结构',</span></p>
+      <p style="font-size:12px;margin:0;line-height:1.7;font-family:monospace;"><span leaf="">　title: '示例结构',</span></p>
       <p style="font-size:12px;color:#B88922;margin:0;line-height:1.7;font-family:monospace;"><span leaf="">　status: 'ready'</span></p>
       <p style="font-size:12px;color:#3E8CB8;margin:0;line-height:1.7;font-family:monospace;"><span leaf="">};</span></p>
     </section>
@@ -199,7 +199,7 @@
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:14px;padding:16px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
       <p style="font-size:12px;font-weight:700;color:#3E8CB8;letter-spacing:1px;margin:0 0 6px;"><span leaf="">✦ 实践提示</span></p>
-      <p style="font-size:13px;color:#455B6B;margin:0;line-height:1.7;"><span leaf="">可直接行动的建议与方法说明占位。</span></p>
+      <p style="font-size:13px;margin:0;line-height:1.7;"><span leaf="">可直接行动的建议与方法说明占位。</span></p>
     </section>
 ```
 
@@ -215,7 +215,7 @@
 
 ```html
 <section style="margin:0 0 18px;background:#E8F5F8;border:1px solid #DCEAF5;border-radius:8px;padding:16px 18px;box-sizing:border-box;">
-      <p style="font-size:13px;color:#455B6B;margin:0;line-height:1.7;text-align:justify;"><span leaf="">背景信息、概念说明或补充资料占位。</span></p>
+      <p style="font-size:13px;margin:0;line-height:1.7;text-align:justify;"><span leaf="">背景信息、概念说明或补充资料占位。</span></p>
     </section>
 ```
 
@@ -292,8 +292,8 @@
 
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:14px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <section style="display:flex;align-items:flex-start;margin-bottom:12px;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#3E8CB8;color:#FFFFFF;font-size:11px;font-weight:700;border-radius:50%;margin-right:10px;flex-shrink:0;"><span leaf="">1</span></span><p style="font-size:14px;color:#455B6B;margin:0;line-height:1.7;"><span leaf="">第一项内容说明占位</span></p></section>
-      <section style="display:flex;align-items:flex-start;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#3E8CB8;color:#FFFFFF;font-size:11px;font-weight:700;border-radius:50%;margin-right:10px;flex-shrink:0;"><span leaf="">2</span></span><p style="font-size:14px;color:#455B6B;margin:0;line-height:1.7;"><span leaf="">第二项内容说明占位</span></p></section>
+      <section style="display:flex;align-items:flex-start;margin-bottom:12px;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#3E8CB8;color:#FFFFFF;font-size:11px;font-weight:700;border-radius:50%;margin-right:10px;flex-shrink:0;"><span leaf="">1</span></span><p style="font-size:16px;margin:0;line-height:1.7;"><span leaf="">第一项内容说明占位</span></p></section>
+      <section style="display:flex;align-items:flex-start;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#3E8CB8;color:#FFFFFF;font-size:11px;font-weight:700;border-radius:50%;margin-right:10px;flex-shrink:0;"><span leaf="">2</span></span><p style="font-size:16px;margin:0;line-height:1.7;"><span leaf="">第二项内容说明占位</span></p></section>
     </section>
 ```
 
@@ -301,8 +301,8 @@
 
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:14px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <p style="font-size:14px;color:#455B6B;margin:0 0 9px;line-height:1.7;"><span style="color:#3E8CB8;font-weight:900;margin-right:8px;"><span leaf="">●</span></span><span leaf="">并列要点说明占位</span></p>
-      <p style="font-size:14px;color:#455B6B;margin:0;line-height:1.7;"><span style="color:#3E8CB8;font-weight:900;margin-right:8px;"><span leaf="">●</span></span><span leaf="">补充要点说明占位</span></p>
+      <p style="font-size:16px;margin:0 0 9px;line-height:1.7;"><span style="color:#3E8CB8;font-weight:900;margin-right:8px;"><span leaf="">●</span></span><span leaf="">并列要点说明占位</span></p>
+      <p style="font-size:16px;margin:0;line-height:1.7;"><span style="color:#3E8CB8;font-weight:900;margin-right:8px;"><span leaf="">●</span></span><span leaf="">补充要点说明占位</span></p>
     </section>
 ```
 
@@ -310,7 +310,7 @@
 
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:14px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <section style="display:flex;align-items:center;margin-bottom:10px;"><span style="width:18px;height:18px;border-radius:5px;background:#3E8CB8;color:#FFFFFF;font-size:12px;text-align:center;line-height:18px;margin-right:9px;"><span leaf="">✓</span></span><span style="font-size:14px;color:#455B6B;"><span leaf="">已完成事项占位</span></span></section>
+      <section style="display:flex;align-items:center;margin-bottom:10px;"><span style="width:18px;height:18px;border-radius:5px;background:#3E8CB8;color:#FFFFFF;font-size:12px;text-align:center;line-height:18px;margin-right:9px;"><span leaf="">✓</span></span><span style="font-size:14px;"><span leaf="">已完成事项占位</span></span></section>
       <section style="display:flex;align-items:center;"><span style="width:18px;height:18px;border-radius:5px;border:1px solid #C2CCD3;background:#FFFFFF;margin-right:9px;"><span leaf=""><br></span></span><span style="font-size:14px;color:#6F8291;"><span leaf="">待确认事项占位</span></span></section>
     </section>
 ```
@@ -331,7 +331,7 @@
 
 ```html
 <section style="margin:0 0 18px;background:#FFFFFF;border-radius:14px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <section style="display:flex;justify-content:space-between;margin-bottom:7px;"><span style="font-size:13px;color:#455B6B;font-weight:700;"><span leaf="">阶段进度占位</span></span><span style="font-size:12px;color:#3E8CB8;font-weight:700;"><span leaf="">示例比例</span></span></section>
+      <section style="display:flex;justify-content:space-between;margin-bottom:7px;"><span style="font-size:13px;font-weight:700;"><span leaf="">阶段进度占位</span></span><span style="font-size:12px;color:#3E8CB8;font-weight:700;"><span leaf="">示例比例</span></span></section>
       <section style="height:8px;background:#E4EAED;border-radius:999px;overflow:hidden;"><span style="display:block;width:72%;height:8px;background:#88C5D4;border-radius:999px;"><span leaf=""><br></span></span></section>
     </section>
 ```
@@ -340,8 +340,8 @@
 
 ```html
 <section style="margin:0 0 18px;background:#F7FAFC;border:1px solid #DCEAF5;border-radius:14px;padding:18px 20px;box-sizing:border-box;box-shadow:0 3px 14px rgba(69,91,107,0.06);">
-      <section style="display:flex;align-items:center;margin-bottom:10px;"><span style="width:8px;height:8px;background:#9BC9CF;border-radius:50%;margin-right:9px;"><span leaf=""><br></span></span><span style="font-size:13px;color:#455B6B;font-weight:700;"><span leaf="">状态信息占位</span></span><span style="font-size:10px;color:#3E8CB8;margin-left:auto;"><span leaf="">READY</span></span></section>
-      <section style="display:flex;align-items:center;"><span style="width:8px;height:8px;background:#F6D46B;border-radius:50%;margin-right:9px;"><span leaf=""><br></span></span><span style="font-size:13px;color:#455B6B;font-weight:700;"><span leaf="">节点信息占位</span></span><span style="font-size:10px;color:#B88922;margin-left:auto;"><span leaf="">CHECK</span></span></section>
+      <section style="display:flex;align-items:center;margin-bottom:10px;"><span style="width:8px;height:8px;background:#9BC9CF;border-radius:50%;margin-right:9px;"><span leaf=""><br></span></span><span style="font-size:13px;font-weight:700;"><span leaf="">状态信息占位</span></span><span style="font-size:10px;color:#3E8CB8;margin-left:auto;"><span leaf="">READY</span></span></section>
+      <section style="display:flex;align-items:center;"><span style="width:8px;height:8px;background:#F6D46B;border-radius:50%;margin-right:9px;"><span leaf=""><br></span></span><span style="font-size:13px;font-weight:700;"><span leaf="">节点信息占位</span></span><span style="font-size:10px;color:#B88922;margin-left:auto;"><span leaf="">CHECK</span></span></section>
     </section>
 ```
 

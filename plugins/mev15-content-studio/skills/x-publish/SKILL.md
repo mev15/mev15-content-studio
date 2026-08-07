@@ -1,6 +1,6 @@
 ---
 name: x-publish
-description: 把 markdown 原稿一键转换并发布到 X (Twitter) Articles 草稿箱：自动做 md → content_state（DraftJS）结构转换，代码块转 blockquote、表格改写为列表、正文图片与封面上传为 X 媒体，最后调官方 POST /2/articles/draft 创建草稿。直连 X 官方 API（OAuth 2.0 PKCE），零 npm 依赖。触发场景：(1) 用户说"发到 X""同步到 X 草稿""发 Twitter 长文/Articles"，(2) 文章 markdown 定稿后要推送到 X，(3) 用户给出 md 文件和封面要求发布到 X。只创建草稿，绝不正式发布；输入是 markdown 原稿而非排版 HTML（X Articles 不接受自定义样式）。
+description: 把 markdown 原稿一键转换并发布到 X (Twitter) Articles 草稿箱：自动做 md → content_state（DraftJS）结构转换，围栏代码转 X 原生 markdown atomic entity、表格改写为列表、正文图片与封面上传为 X 媒体，最后调官方 POST /2/articles/draft 创建草稿。直连 X 官方 API（OAuth 2.0 PKCE），零 npm 依赖。触发场景：(1) 用户说"发到 X""同步到 X 草稿""发 Twitter 长文/Articles"，(2) 文章 markdown 定稿后要推送到 X，(3) 用户给出 md 文件和封面要求发布到 X。只创建草稿，绝不正式发布；输入是 markdown 原稿而非排版 HTML（X Articles 不接受自定义样式）。
 ---
 
 # X Articles 草稿发布 Skill
@@ -21,13 +21,15 @@ description: 把 markdown 原稿一键转换并发布到 X (Twitter) Articles �
 | `#` / `##` / `###` | header-one/two/three | 正文中再出现的 H1 保留为 header-one |
 | `####` 及更深 | 整段粗体 | X 无 H4-H6 |
 | 粗体/斜体/删除线 | inline_style_ranges | 一一对应 |
+| `==高亮==` | 粗体 | X API 没有背景高亮样式；去掉 `==` 并以粗体保留强调语义 |
 | `[文本](url)` | link entity | 一一对应 |
 | 行内代码 | 纯文本 | X 无 code 样式，反引号剥除 |
-| 代码块 | blockquote（整块） | 块内保留换行；X 无代码块类型，等宽与高亮丢失，适合短命令片段 |
+| 围栏代码块 | atomic + markdown entity | `data.markdown` 保留完整围栏、语言标记、换行与原生代码样式 |
 | 表格 | 无序列表（首行视为表头、首列为行主键） | > 3 列会警告；数据表格建议改链 Dune |
 | 无序/有序列表 | list-item（缩进转 depth，上限 2） | 嵌套渲染效果以 X 实际为准 |
 | `>` 引用 | blockquote | 一一对应 |
-| 独立成行的 `![](...)` | atomic 图片块 | 仅 jpg/png/webp ≤ 5MB；GIF/SVG 警告跳过 |
+| 相邻普通文本行 | 各自独立 unstyled block | 忠实保留中文长文源稿的物理分行，不拼成一个段落 |
+| 独立成行的 `![](...)` | atomic 图片块 | 非空 alt 写入原生 `caption`；API 不提供图注对齐字段，由 X 决定显示；仅 jpg/png/webp ≤ 5MB |
 | 行内图片 | 降级为 alt 文本 | 图片请独立成行 |
 | `---` 分割线 | 跳过并警告 | API 无 divider 元素 |
 
@@ -109,4 +111,4 @@ cp -r <本目录> ~/.codex/skills/x-publish     # 或 ln -s
 
 - **只写草稿箱**：脚本没有任何 `articles/{id}/publish` 调用；草稿在 x.com 桌面网页版的发帖框 → Articles 里查看、编辑、删除；重复运行创建新草稿而非覆盖。
 - OAuth token 等同账号发文权限：`tokens.json` 与 `env` 均 0600 存放于本机，不要提交仓库。scopes 最小化为 `tweet.read tweet.write users.read media.write offline.access`。
-- **schema 注意**：Articles API 较新，官方文档示例不全。`cover_media` 结构已实测确认为 `{media_id, media_category}`（2026-08 通过 API 校验错误信息反推并验证）；link entity 按 DraftJS 惯例实现、API 已接受。若草稿内容渲染异常，先 `--dry-run` 核对 JSON，再对照 [官方文档](https://docs.x.com/x-api/articles/introduction) 当前版本调整。
+- **schema 注意**：Articles API 较新。围栏代码按官方 schema 使用 `atomic` block 指向 `type: markdown`、`mutability: mutable` 的 entity，完整代码放入 `data.markdown`；图片 entity 只有 `caption`，没有图注对齐字段。`cover_media` 结构已实测确认为 `{media_id, media_category}`；link entity 按 DraftJS 惯例实现、API 已接受。若草稿内容渲染异常，先 `--dry-run` 核对 JSON，再对照 [创建草稿官方文档](https://docs.x.com/x-api/articles/create-draft-article) 当前版本调整。
