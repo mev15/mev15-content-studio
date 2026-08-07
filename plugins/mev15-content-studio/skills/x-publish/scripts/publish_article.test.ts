@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mdToPlan, normalizeRemoteImageFilename, parseInline } from './publish_article.ts';
+import { formatPromoText, mdToPlan, normalizeRemoteImageFilename, parseInline, xPromoPath } from './publish_article.ts';
 
 test('==highlight== is stripped and converted to bold', () => {
   const got = parseInline('使用 ==Paseo== 继续开发');
@@ -39,4 +39,17 @@ test('extensionless remote images use HTTP Content-Type', () => {
   assert.equal(normalizeRemoteImageFilename('cover', 'image/jpeg; charset=binary'), 'cover.jpg');
   assert.equal(normalizeRemoteImageFilename('already.webp', 'application/octet-stream'), 'already.webp');
   assert.equal(normalizeRemoteImageFilename('unknown', 'application/octet-stream'), null);
+});
+
+test('promo sidecar defaults next to markdown source', () => {
+  assert.equal(
+    xPromoPath('/tmp/articles/demo.md'),
+    '/tmp/articles/demo.x-promo.md',
+  );
+  assert.equal(xPromoPath('/tmp/articles/demo.md', '/tmp/custom.md'), '/tmp/custom.md');
+});
+
+test('promo sidecar contains only copy-ready text', () => {
+  assert.equal(formatPromoText('  一段待发布导语。\n'), '一段待发布导语。\n');
+  assert.throws(() => formatPromoText('   '), /不能为空/);
 });

@@ -65,6 +65,33 @@ export function parseEnvFile(text: string): Record<string, string> {
   return out;
 }
 
+/** 默认把待发布导语保存为原稿旁的 <原稿名>.x-promo.md。 */
+export function xPromoPath(mdPath: string, overridePath?: string): string {
+  if (overridePath) return resolve(overridePath);
+  const absoluteMd = resolve(mdPath);
+  const stem = basename(absoluteMd, extname(absoluteMd));
+  return join(dirname(absoluteMd), `${stem}.x-promo.md`);
+}
+
+/** sidecar 只保存可直接复制的导语正文，不加入标题或 frontmatter。 */
+export function formatPromoText(summary: string): string {
+  const text = summary.trim();
+  if (!text) throw new Error('--summary 不能为空');
+  return `${text}\n`;
+}
+
+async function savePromoText(path: string, summary: string, overwrite: boolean): Promise<void> {
+  const content = formatPromoText(summary);
+  let existing: string | undefined;
+  try { existing = await readFile(path, 'utf8'); } catch { /* 文件尚不存在 */ }
+  if (existing !== undefined) {
+    if (existing === content) return;
+    if (!overwrite) throw new Error(`待发布导语已存在且内容不同：${path}\n如需替换，请显式传 --overwrite-promo`);
+  }
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, content, 'utf8');
+}
+
 /** 为无扩展名/错误扩展名的外链图片按 HTTP Content-Type 补出可上传文件名 */
 export function normalizeRemoteImageFilename(filename: string, contentType: string): string | null {
   const ext = extname(filename).slice(1).toLowerCase();
@@ -485,12 +512,17 @@ async function createDraft(token: string, plan: ContentPlan, coverMediaId?: stri
 function usage(): void {
   console.log(`用法：
   首次授权：  publish_article.ts --login   （交互式：需在真实终端运行，中途粘贴回调 URL）
-  发布草稿：  publish_article.ts --md 文章.md [--cover 封面.jpg] [--title "标题"] [--dry-run]
+  发布草稿：  publish_article.ts --md 文章.md [--cover 封面.jpg] [--title "标题"] [--summary "待发布导语"] [--dry-run]
+  只存导语：  publish_article.ts --md 文章.md --summary "待发布导语" --promo-only
 
 参数：
   --md         markdown 原稿路径（必填；标题默认取第一个 H1）
   --cover      封面图（jpg/png/webp，≤5MB；可选，也可事后在网页编辑器补）
   --title      覆盖标题（默认取 md 的 H1）
+  --summary    待发布导语；不进入 Article 正文，保存为原稿旁的 .x-promo.md
+  --promo-file 覆盖待发布导语的保存路径
+  --promo-only 只保存待发布导语，不创建草稿、不调用 X API
+  --overwrite-promo 允许替换已有且内容不同的 .x-promo.md
   --dry-run    只打印转换计划与 content_state JSON，不调任何 API
   --login      运行一次 OAuth 2.0 PKCE 交互式授权（凭据配置见 ../env.example）`);
 }
@@ -499,6 +531,8 @@ async function main(): Promise<void> {
   const { values } = parseArgs({
     options: {
       md: { type: 'string' }, cover: { type: 'string' }, title: { type: 'string' },
+      summary: { type: 'string' }, 'promo-file': { type: 'string' },
+      'promo-only': { type: 'boolean' }, 'overwrite-promo': { type: 'boolean' },
       'dry-run': { type: 'boolean' }, login: { type: 'boolean' },
     },
   });
@@ -509,6 +543,18 @@ async function main(): Promise<void> {
   const mdPath = resolve(values.md as string);
   const md = await readFile(mdPath, 'utf8');
   const plan = mdToPlan(md, { title: values.title });
+  const summary = values.summary?.trim();
+  if ((values['promo-only'] || values['promo-file'] || values['overwrite-promo']) && !summary) {
+    throw new Error('--promo-only、--promo-file、--overwrite-promo 需要同时传 --summary');
+  }
+  const promoPath = summary ? xPromoPath(mdPath, values['promo-file']) : undefined;
+
+  if (values['promo-only']) {
+    await savePromoText(promoPath as string, summary as string, Boolean(values['overwrite-promo']));
+    console.log(`✅ 待发布导语已保存：${promoPath}`);
+    console.log(summary);
+    return;
+  }
 
   const stats = new Map<string, number>();
   for (const b of plan.blocks) stats.set(b.type, (stats.get(b.type) ?? 0) + 1);
@@ -519,11 +565,20 @@ async function main(): Promise<void> {
   if (values['dry-run']) {
     if (plan.images.length) console.log('\n将上传的图片：\n' + plan.images.map((i) => `  - ${i.src}`).join('\n'));
     if (values.cover) console.log(`\n封面：${values.cover}`);
+    if (summary) {
+      console.log(`\n待发布导语（正式创建草稿时保存，不进入正文）：${promoPath}`);
+      console.log(summary);
+    }
     for (const w of plan.warnings) console.warn(`⚠️ ${w}`);
     console.log('\ncontent_state（供核对）：');
     console.log(JSON.stringify({ title: plan.title, content_state: { blocks: plan.blocks, entities: plan.entities } }, null, 2));
     console.log('\n（dry-run：未调用任何 API）');
     return;
+  }
+
+  if (summary) {
+    await savePromoText(promoPath as string, summary, Boolean(values['overwrite-promo']));
+    console.log(`✅ 待发布导语已保存：${promoPath}`);
   }
 
   if (!conf.X_CLIENT_ID) throw new Error('缺少 X_CLIENT_ID：先配置 ~/.config/x-publish/env 并 --login');
@@ -542,6 +597,7 @@ async function main(): Promise<void> {
   const draftId = await createDraft(token, plan, coverMediaId);
   for (const w of plan.warnings) console.warn(`⚠️ ${w}`);
   console.log(`\n✅ 草稿已创建：article id ${draftId}`);
+  if (summary) console.log(`   待发布导语：${promoPath}（正式发布后另发 Post 时使用，不在 Article 正文中）`);
   console.log('   到 x.com（桌面网页版）→ 发帖框 → Articles 草稿里查看与编辑；本工具不做正式发布。');
 }
 

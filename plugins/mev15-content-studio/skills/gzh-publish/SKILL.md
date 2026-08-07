@@ -1,6 +1,6 @@
 ---
 name: gzh-publish
-description: 把排版好的微信公众号 HTML（正文配图为图床外链）一键同步到公众号草稿箱：自动下载正文外链图片、替换为微信 CDN；未指定封面时从原文同名目录自动选择公众号头条与次条两个尺寸并上传永久素材；最后创建草稿。直连微信官方 API（AppID/AppSecret + IP 白名单），零第三方服务、零 npm 依赖。触发场景：(1) 用户说"发到草稿箱""同步到公众号""上传公众号素材/封面"，(2) gzh-design 排版完成后要推送到公众号，(3) 用户给出成品 HTML 或封面要求发布。只创建草稿，绝不群发或正式发布；不做排版（排版用 gzh-design）。
+description: 把排版好的微信公众号 HTML（正文配图为图床外链）一键同步到公众号草稿箱：自动下载正文外链图片、替换为微信 CDN；未指定封面时从原文同名目录自动选择公众号头条与次条两个尺寸并上传永久素材；支持生成或传入推广摘要并写入微信 digest；最后创建草稿。直连微信官方 API（AppID/AppSecret + IP 白名单），零第三方服务、零 npm 依赖。触发场景：(1) 用户说"发到草稿箱""同步到公众号""上传公众号素材/封面"，(2) gzh-design 排版完成后要推送到公众号，(3) 用户给出成品 HTML、摘要或封面要求发布。只创建草稿，绝不群发或正式发布；不做排版（排版用 gzh-design）。
 ---
 
 # 公众号草稿发布 Skill
@@ -9,7 +9,8 @@ description: 把排版好的微信公众号 HTML（正文配图为图床外链�
 
 1. 扫描 HTML 中所有 `<img>` 的图床外链，逐张下载并调用微信 `media/uploadimg` 上传（不占素材库 10 万张配额），把外链替换为微信 CDN（`mmbiz.qpic.cn`）链接——**微信会过滤正文里的非微信域图片，这一步是必须的**；
 2. 未指定封面时，在原文同目录的同名目录下查找 `covers/`，只选择公众号头条 `900×383` 与次条 `500×500` 两张成品并调用 `material/add_material` 上传为永久素材；头条图的 `media_id` 用作草稿 `thumb_media_id`；
-3. 调用 `draft/add` 创建草稿，输出草稿 `media_id`。
+3. 准备一段简短推广摘要并通过 `summary` 映射到微信 `digest`（用户明确不要摘要时可省略）；
+4. 调用 `draft/add` 创建草稿，输出草稿 `media_id`。
 
 全程只调 `api.weixin.qq.com` 官方接口，内容与凭据不经过任何第三方。
 
@@ -47,7 +48,7 @@ node --experimental-strip-types scripts/publish_draft.ts \
   --html output/preview/my-article/article.html \
   --title "文章标题" \
   --author "作者名" \
-  --digest "可选摘要，不给则微信自动截取正文前 54 字" \
+  --summary "一两句话说明文章价值，吸引读者打开" \
   --source-url "https://example.com/original"
 ```
 
@@ -61,10 +62,17 @@ node --experimental-strip-types scripts/publish_draft.ts \
 | `--article` | | 原文 Markdown 路径；自动发现封面但存在多份同名原文时用它消歧 |
 | `--title` | ✅ | 草稿标题（≤ 64 字） |
 | `--author` | | 作者名 |
-| `--digest` | | 摘要；省略则微信自动截取 |
+| `--summary` | | 推荐的统一推广摘要参数；写入微信官方 `digest` 字段，不进入正文 |
+| `--digest` | | 旧参数，保留兼容；与 `--summary` 同时传时内容必须一致 |
 | `--source-url` | | 「阅读原文」链接 |
 | `--append-html` | | 发布前追加到正文末尾的 HTML 片段文件（如公众号名片，见下节），相对路径相对当前目录；不传时读配置 `GZH_APPEND_HTML`（相对路径相对 `~/.config/gzh-publish/`），两者都无则不追加 |
 | `--dry-run` | | 只解析并打印计划，不调用微信 API |
+
+## 推广摘要
+
+- 创建草稿前默认根据原文准备 1～2 句简洁摘要，说明文章主题与读者收益，避免虚构结论、夸张承诺和与正文重复过长；通过 `--summary` 传给脚本。
+- 用户已经给出说明文字时原样使用，不擅自改写；用户明确要求不写摘要或让微信自动截取时省略 `--summary`。
+- 摘要只进入草稿元数据 `digest`，不追加到正文 HTML。`--dry-run` 会显示将写入的摘要，便于上传前核对。
 
 ## 封面自动发现
 

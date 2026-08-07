@@ -1,6 +1,6 @@
 ---
 name: x-publish
-description: 把 markdown 原稿一键转换并发布到 X (Twitter) Articles 草稿箱：自动做 md → content_state（DraftJS）结构转换，围栏代码转 X 原生 markdown atomic entity、表格改写为列表、正文图片与封面上传为 X 媒体，最后调官方 POST /2/articles/draft 创建草稿。直连 X 官方 API（OAuth 2.0 PKCE），零 npm 依赖。触发场景：(1) 用户说"发到 X""同步到 X 草稿""发 Twitter 长文/Articles"，(2) 文章 markdown 定稿后要推送到 X，(3) 用户给出 md 文件和封面要求发布到 X。只创建草稿，绝不正式发布；输入是 markdown 原稿而非排版 HTML（X Articles 不接受自定义样式）。
+description: 把 markdown 原稿一键转换并发布到 X (Twitter) Articles 草稿箱：自动做 md → content_state（DraftJS）结构转换，围栏代码转 X 原生 markdown atomic entity、表格改写为列表、正文图片与封面上传为 X 媒体；生成或接收一段待发布导语，保存为原稿旁的 `.x-promo.md`；最后调官方 POST /2/articles/draft 创建草稿。直连 X 官方 API（OAuth 2.0 PKCE），零 npm 依赖。触发场景：(1) 用户说"发到 X""同步到 X 草稿""发 Twitter 长文/Articles"，(2) 文章 markdown 定稿后要推送到 X，(3) 用户给出 md 文件、推广文案或封面要求发布到 X。只创建草稿，绝不正式发布；输入是 markdown 原稿而非排版 HTML（X Articles 不接受自定义样式）。
 ---
 
 # X Articles 草稿发布 Skill
@@ -9,7 +9,8 @@ description: 把 markdown 原稿一键转换并发布到 X (Twitter) Articles �
 
 1. 解析 markdown，转换为 X Articles 的 `content_state`（DraftJS 结构，snake_case 字段）；
 2. 正文图片（本地路径或外链均可）上传到 X 媒体端点（`media_category=tweet_image`），封面同理；
-3. 调 `POST /2/articles/draft` 创建草稿，输出 article id。
+3. 准备一段待发布导语，保存为原稿旁的 `<原稿名>.x-promo.md`，同时在结果中回显；
+4. 调 `POST /2/articles/draft` 创建草稿，输出 article id。
 
 全程只调 `api.x.com` 官方接口，内容与凭据不经过任何第三方。
 
@@ -63,6 +64,7 @@ node --experimental-strip-types scripts/publish_article.ts --login
 node --experimental-strip-types scripts/publish_article.ts \
   --md drafts/my-article.md \
   --cover covers/x-cover.jpg \
+  --summary "一两句话说明文章价值，吸引读者打开" \
   --dry-run
 ```
 
@@ -75,8 +77,20 @@ dry-run 会完整打印将提交的 `content_state` JSON、图片上传清单与
 | `--md` | ✅ | markdown 原稿路径；标题默认取第一个 H1 |
 | `--cover` | | 封面图（jpg/png/webp ≤ 5MB）；可省略，草稿建好后在网页编辑器补 |
 | `--title` | | 覆盖标题 |
+| `--summary` | | 待发布导语；不进入 Article 正文，正式创建草稿时保存为 `.x-promo.md` |
+| `--promo-file` | | 覆盖待发布导语的默认保存路径 |
+| `--promo-only` | | 只保存导语，不创建草稿、不调用 X API；必须同时传 `--summary` |
+| `--overwrite-promo` | | 显式允许替换已有且内容不同的导语文件；防止覆盖人工修改 |
 | `--dry-run` | | 只打印转换计划与 content_state，不产生任何外部副作用 |
 | `--login` | | 运行一次 OAuth 2.0 PKCE 授权 |
+
+## 待发布导语
+
+- X Articles 草稿接口没有独立的摘要或 teaser 字段。导语不放进正文，也不只留在会话中；默认持久化到原稿旁的 `<原稿名>.x-promo.md`。
+- 创建草稿前默认根据原文准备 1～2 句简洁导语，说明文章主题、独特信息或读者收益，避免虚构结论和夸张承诺；用户已经给出文案时原样使用。
+- `.x-promo.md` 只保存可直接复制的文案正文，不加标题或 frontmatter。Article 正式发布后，可把这段导语与文章链接组成一条单独的 Post；本 skill 不正式发布 Article，也不发送配套 Post。
+- 只需生成导语时使用 `--promo-only`。`--dry-run` 只展示计划保存的位置和内容，不写文件；正式创建草稿时写入 sidecar，并在终端回显。
+- 已有 sidecar 内容不同时默认停止，避免覆盖人工编辑；只有用户明确要求替换时才传 `--overwrite-promo`。
 
 ## 双平台安装（Claude Code / Codex）
 

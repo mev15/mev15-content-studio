@@ -54,6 +54,16 @@ export function parseEnvFile(text: string): Record<string, string> {
   return out;
 }
 
+/** 统一的 --summary 映射到微信 digest；保留 --digest 向后兼容。 */
+export function chooseDigest(digest?: string, summary?: string): string | undefined {
+  const oldValue = digest?.trim();
+  const unifiedValue = summary?.trim();
+  if (oldValue && unifiedValue && oldValue !== unifiedValue) {
+    throw new Error('--summary 与 --digest 内容不一致，请只传一个或传相同内容');
+  }
+  return unifiedValue || oldValue || undefined;
+}
+
 export interface WechatCovers {
   primary: string;
   secondary: string;
@@ -280,7 +290,7 @@ const USAGE = `用法:
   node --experimental-strip-types publish_draft.ts \\
     --html <排版产物.html> --title <标题> \\
     [--cover <头条封面.jpg> --secondary-cover <次条封面.jpg>] [--article <原文.md>] \\
-    [--author 作者] [--digest 摘要] [--source-url URL] \\
+    [--author 作者] [--summary 推广摘要] [--digest 摘要] [--source-url URL] \\
     [--append-html 尾部片段.html] [--dry-run]
 
 不传 --cover 时，自动从“原文同目录/原文同名目录/covers”选择公众号 900x383 与 500x500 两张封面。
@@ -295,6 +305,7 @@ async function main(): Promise<void> {
       article: { type: 'string' },
       title: { type: 'string' },
       author: { type: 'string' },
+      summary: { type: 'string' },
       digest: { type: 'string' },
       'source-url': { type: 'string' },
       'append-html': { type: 'string' },
@@ -308,6 +319,7 @@ async function main(): Promise<void> {
   if (!values.cover && values['secondary-cover']) {
     throw new Error('--secondary-cover 只能与 --cover 一起使用');
   }
+  const digest = chooseDigest(values.digest, values.summary);
 
   // 配置优先级：进程环境变量 > ~/.config/gzh-publish/env（文件不存在则忽略）
   let fileEnv: Record<string, string> = {};
@@ -354,7 +366,9 @@ async function main(): Promise<void> {
     for (const s of external) console.log(`  → 将上传: ${s}`);
     console.log(`头条封面（草稿使用）: ${primaryCover}`);
     if (secondaryCover) console.log(`次条封面（仅上传永久素材）: ${secondaryCover}`);
-    console.log(`标题: ${values.title}\n[dry-run] 未调用任何微信 API。`);
+    console.log(`标题: ${values.title}`);
+    if (digest) console.log(`推广摘要（写入微信 digest）: ${digest}`);
+    console.log('[dry-run] 未调用任何微信 API。');
     return;
   }
 
@@ -395,7 +409,7 @@ async function main(): Promise<void> {
     content,
     thumb_media_id: thumbMediaId,
     ...(values.author ? { author: values.author } : {}),
-    ...(values.digest ? { digest: values.digest } : {}),
+    ...(digest ? { digest } : {}),
     ...(values['source-url'] ? { content_source_url: values['source-url'] } : {}),
   });
 

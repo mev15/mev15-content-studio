@@ -10,6 +10,7 @@ import {
   replaceImageSrcs,
   parseEnvFile,
   selectWechatCoverFiles,
+  chooseDigest,
 } from './publish_draft.ts';
 
 test('extractImageSrcs: 双引号/单引号/属性乱序/大小写/去重', () => {
@@ -76,6 +77,17 @@ test('parseEnvFile: 注释/空行/引号/含等号的值/空格', () => {
 
 test('parseEnvFile: 空文本返回空对象', () => {
   assert.deepEqual(parseEnvFile(''), {});
+});
+
+test('chooseDigest: summary 映射到 digest，并兼容旧参数', () => {
+  assert.equal(chooseDigest(undefined, '  新摘要  '), '新摘要');
+  assert.equal(chooseDigest('旧摘要', undefined), '旧摘要');
+  assert.equal(chooseDigest('同一摘要', '同一摘要'), '同一摘要');
+  assert.equal(chooseDigest('  ', ''), undefined);
+});
+
+test('chooseDigest: 两个参数不一致时拒绝静默覆盖', () => {
+  assert.throws(() => chooseDigest('摘要 A', '摘要 B'), /内容不一致/);
 });
 
 test('selectWechatCoverFiles: 只选公众号两个成品尺寸', () => {
