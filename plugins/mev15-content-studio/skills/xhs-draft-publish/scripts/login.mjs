@@ -15,9 +15,11 @@
 import { chromium } from "playwright";
 import { readFileSync, mkdirSync, existsSync, unlinkSync, chmodSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
+import { homedir } from "node:os";
 
 const SKILL_DIR = resolve(dirname(new URL(import.meta.url).pathname), "..");
-const STATE_DIR = process.env.XHS_STATE_DIR || join(SKILL_DIR, ".state");
+const CONFIG_HOME = process.env.XDG_CONFIG_HOME || join(homedir(), ".config");
+const STATE_DIR = resolve(process.env.XHS_STATE_DIR || join(CONFIG_HOME, "xhs-draft-publish"));
 const STATE_FILE = join(STATE_DIR, "storage-state.json");
 const CODE_FILE = join(STATE_DIR, "code.txt");
 const SHOT_DIR = join(STATE_DIR, "shots");
@@ -61,7 +63,8 @@ async function isLoggedIn(page) {
 }
 
 const args = parseArgs(process.argv.slice(2));
-mkdirSync(STATE_DIR, { recursive: true });
+mkdirSync(STATE_DIR, { recursive: true, mode: 0o700 });
+chmodSync(STATE_DIR, 0o700);
 
 // ---------- --check ----------
 if (args.check) {

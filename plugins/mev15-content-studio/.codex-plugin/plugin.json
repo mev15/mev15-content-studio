@@ -1,7 +1,7 @@
 {
   "name": "mev15-content-studio",
-  "version": "0.2.1",
-  "description": "微信公众号排版、青十五文章配图与草稿箱发布工具包",
+  "version": "0.3.0",
+  "description": "微信公众号排版、青十五文章配图，以及公众号、X 与小红书多平台草稿发布工具包",
   "author": {
     "name": "mev15",
     "url": "https://github.com/mev15"
@@ -9,22 +9,21 @@
   "homepage": "https://github.com/mev15/mev15-content-studio",
   "repository": "https://github.com/mev15/mev15-content-studio",
   "license": "AGPL-3.0-or-later",
-  "keywords": ["wechat", "markdown", "article-layout", "illustration", "chinese-content", "wechat-draft", "publish"],
+  "keywords": ["wechat", "x", "twitter", "xiaohongshu", "xhs", "markdown", "article-layout", "illustration", "chinese-content", "draft-publish"],
   "skills": "./skills/",
   "interface": {
     "displayName": "Mev15 Content Studio",
-    "shortDescription": "公众号排版、青十五配图与草稿箱发布",
-    "longDescription": "把 Markdown 排成可复制到微信公众号的 HTML，为中文文章生成青十五风格正文配图和多平台封面，并可将成品 HTML 与封面直连微信官方 API 发布到公众号草稿箱。",
+    "shortDescription": "公众号、X 与小红书内容创作发布",
+    "longDescription": "把 Markdown 排成微信公众号 HTML，生成青十五风格正文配图与多平台封面；将文章同步到公众号或 X 草稿箱，也可渲染为小红书 3:4 推文壳多图卡片并通过浏览器自动化仅存入小红书草稿箱。",
     "developerName": "mev15",
     "category": "Productivity",
     "capabilities": ["Write"],
     "websiteURL": "https://github.com/mev15/mev15-content-studio",
     "brandColor": "#3F73B9",
     "defaultPrompt": [
-      "用 AI 科技蓝排版这篇 Markdown 公众号文章。",
-      "用 AI 清透湖蓝排版这篇文章，并生成统一预览入口。",
-      "为这篇文章生成青十五风格正文配图和多平台封面。",
-      "把排版好的 HTML 和封面图发布到公众号草稿箱。"
+      "用 AI 科技蓝排版这篇 Markdown，并生成青十五风格配图与多平台封面。",
+      "把这篇文章同步到公众号或 X 草稿箱，并生成对应的推广摘要。",
+      "把这篇文章做成小红书推文壳多图卡片，并在确认后存入小红书草稿箱。"
     ]
   }
 }

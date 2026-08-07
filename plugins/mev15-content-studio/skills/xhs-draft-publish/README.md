@@ -18,7 +18,7 @@ node scripts/login.mjs --check                  # 先查登录态，有效就不
 node scripts/login.mjs --phone <11位手机号>      # 失效时走短信登录
 ```
 
-登录脚本会填手机号、勾协议、点"发送验证码"，然后轮询等待。收到短信后把验证码写入 `.state/code.txt`，脚本自动提交并保存登录态到 `.state/storage-state.json`（权限 600）。每步截图落在 `.state/shots/`。
+登录脚本会填手机号、勾协议、点"发送验证码"，然后轮询等待。收到短信后把验证码写入 `~/.config/xhs-draft-publish/code.txt`，脚本自动提交并保存登录态到 `~/.config/xhs-draft-publish/storage-state.json`（目录权限 700、文件权限 600）。每步截图落在同目录的 `shots/`。设置了 `XDG_CONFIG_HOME` 时配置目录随之变化，也可用 `XHS_STATE_DIR` 覆盖整个状态目录。
 
 登录态存活通常数周，失效时 `--check` 会明确报出。
 
@@ -41,7 +41,7 @@ node scripts/publish.mjs --dir <卡片目录>             # 确认后正式存�
 - 保持人类量级节奏：一天一两篇，不要批量连发
 - 存草稿不进入内容分发，是这条链上暴露最小的动作。**不要**把脚本改成自动发布
 - 登录态 cookie 落在本机磁盘。若本机存有其他敏感凭据，考虑挪到隔离机器运行
-- `.state/` 已在 `.gitignore` 中，严禁纳入版本控制或分享
+- `~/.config/xhs-draft-publish/`（或自定义 `XHS_STATE_DIR`）严禁纳入版本控制或分享
 
 ## 许可
 

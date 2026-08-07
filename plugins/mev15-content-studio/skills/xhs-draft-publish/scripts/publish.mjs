@@ -14,9 +14,11 @@
 import { chromium } from "playwright";
 import { readFileSync, readdirSync, existsSync, mkdirSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
+import { homedir } from "node:os";
 
 const SKILL_DIR = resolve(dirname(new URL(import.meta.url).pathname), "..");
-const STATE_DIR = process.env.XHS_STATE_DIR || join(SKILL_DIR, ".state");
+const CONFIG_HOME = process.env.XDG_CONFIG_HOME || join(homedir(), ".config");
+const STATE_DIR = resolve(process.env.XHS_STATE_DIR || join(CONFIG_HOME, "xhs-draft-publish"));
 const STATE_FILE = join(STATE_DIR, "storage-state.json");
 
 const PUBLISH_URL = "https://creator.xiaohongshu.com/publish/publish?source=official";

@@ -1,6 +1,6 @@
 # Mev15 Content Studio
 
-面向中文内容创作的 Codex 插件包：微信公众号排版 + 青十五文章配图 + 公众号草稿箱发布 + X (Twitter) Articles 草稿箱发布。
+面向中文内容创作的 Codex 插件包：微信公众号排版、青十五文章配图，以及公众号、X (Twitter) Articles、小红书多平台草稿发布。
 
 ## 包含的 skills
 
@@ -56,6 +56,8 @@ cp -R plugins/mev15-content-studio/skills/gzh-design "${CODEX_HOME:-$HOME/.codex
 cp -R plugins/mev15-content-studio/skills/qing-shiwu-illustrations "${CODEX_HOME:-$HOME/.codex}/skills/"
 cp -R plugins/mev15-content-studio/skills/gzh-publish "${CODEX_HOME:-$HOME/.codex}/skills/"
 cp -R plugins/mev15-content-studio/skills/x-publish "${CODEX_HOME:-$HOME/.codex}/skills/"
+cp -R plugins/mev15-content-studio/skills/xhs-tweet-cards "${CODEX_HOME:-$HOME/.codex}/skills/"
+cp -R plugins/mev15-content-studio/skills/xhs-draft-publish "${CODEX_HOME:-$HOME/.codex}/skills/"
 ```
 
 ### Claude Code
@@ -68,6 +70,8 @@ cp -R plugins/mev15-content-studio/skills/gzh-design ~/.claude/skills/
 cp -R plugins/mev15-content-studio/skills/qing-shiwu-illustrations ~/.claude/skills/
 cp -R plugins/mev15-content-studio/skills/gzh-publish ~/.claude/skills/
 cp -R plugins/mev15-content-studio/skills/x-publish ~/.claude/skills/
+cp -R plugins/mev15-content-studio/skills/xhs-tweet-cards ~/.claude/skills/
+cp -R plugins/mev15-content-studio/skills/xhs-draft-publish ~/.claude/skills/
 ```
 
 ## 使用示例
@@ -90,6 +94,14 @@ Use $gzh-publish 把 article.html 和 cover.jpg 发布到公众号草稿箱，�
 
 ```text
 Use $x-publish 把 article.md 和 x-cover.jpg 发布到 X Articles 草稿箱。
+```
+
+```text
+Use $xhs-tweet-cards 把 article.md 生成小红书推文壳多图卡片和发帖文案。
+```
+
+```text
+Use $xhs-draft-publish 把卡片目录存入小红书草稿箱。
 ```
 
 ## 更新

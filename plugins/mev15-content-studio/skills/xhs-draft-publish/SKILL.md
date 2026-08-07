@@ -10,7 +10,7 @@ description: 用短信验证码登录小红书创作服务平台，把生成好�
 ## 一、前置条件
 
 - 输入目录里有 `card-NN.png`（≤18 张）和 `caption.txt`（第 1 行标题 ≤20 字，空行后为正文 ≤1000 字）——即 `xhs-tweet-cards` skill 的输出目录
-- 登录态存于 `<skill目录>/.state/storage-state.json`（权限 600），可用 `XHS_STATE_DIR` 环境变量改位置
+- 登录态默认存于 `~/.config/xhs-draft-publish/storage-state.json`（目录权限 700、文件权限 600）；设置了 `XDG_CONFIG_HOME` 时随其变化，也可用 `XHS_STATE_DIR` 覆盖整个状态目录
 
 ## 二、鉴权：短信验证码登录（人机协作，无需看浏览器界面）
 
@@ -31,10 +31,10 @@ node <skill目录>/scripts/login.mjs --phone <11位手机号>
 
 1. 脚本填手机号、勾协议、点"发送验证码"，然后轮询等待
 2. **向用户要验证码**：告诉用户短信已发出，请把 6 位验证码发到对话里
-3. 用户给出后，你把它写入 `<state目录>/code.txt`（就是 `.state/code.txt`）
+3. 用户给出后，你把它写入 `<state目录>/code.txt`（默认是 `~/.config/xhs-draft-publish/code.txt`）
 4. 脚本读到后自动提交，成功则保存登录态并打印 `✅ 登录成功`
 
-失败时脚本会在 `.state/shots/` 留下每步截图，用 Read 查看定位原因（验证码错误/过期、二次验证等）。
+失败时脚本会在 `~/.config/xhs-draft-publish/shots/` 留下每步截图，用 Read 查看定位原因（验证码错误/过期、二次验证等）。
 
 ## 三、存草稿
 
@@ -59,5 +59,5 @@ node <skill目录>/scripts/publish.mjs --dir <卡片目录>
 - 若从数据中心 IP（非家宽）运行，属账号安全侧的异常信号。用主力账号前建议先用测试号验证流程
 - 保持人类量级节奏：一天一两篇，不要批量连发
 - 存草稿不进入内容分发，是这条链上暴露最小的动作；**不要**把这套脚本改成自动发布
-- 登录态 cookie 落在本机磁盘（0600）。若本机存有其他敏感凭据，可考虑把本 skill 挪到无私钥的机器运行
-- 严禁把 `.state/` 目录纳入任何版本控制或公开分享
+- 登录态 cookie 落在本机配置目录（目录 0700、文件 0600）。若本机存有其他敏感凭据，可考虑把本 skill 挪到无私钥的机器运行
+- 严禁把 `~/.config/xhs-draft-publish/` 或自定义 `XHS_STATE_DIR` 纳入任何版本控制或公开分享
