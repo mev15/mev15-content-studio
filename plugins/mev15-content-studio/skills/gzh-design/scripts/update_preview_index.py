@@ -3,6 +3,7 @@
 
 import argparse
 import html
+import json
 import os
 import re
 from datetime import datetime
@@ -38,7 +39,8 @@ def collect_articles(preview_root):
     """只收集文章子目录；以下划线或点开头的内部目录会被忽略。"""
     articles = []
     for article_dir in preview_root.iterdir():
-        if not article_dir.is_dir() or article_dir.name.startswith(("_", ".")):
+        if (not article_dir.is_dir() or article_dir.name == "xhs" or
+                article_dir.name.startswith(("_", "."))):
             continue
 
         preview_files = sorted(
@@ -64,6 +66,7 @@ def collect_articles(preview_root):
         related = [primary, *clean_files, *markdown_files]
         modified = max(path.stat().st_mtime for path in related)
         articles.append({
+            "kind": "gzh",
             "name": article_dir.name,
             "primary": primary,
             "clean": clean_files[0] if clean_files else None,
@@ -75,63 +78,117 @@ def collect_articles(preview_root):
     return sorted(articles, key=lambda item: (-item["modified"], item["name"]))
 
 
-def render_card(article, index, preview_root):
-    name = html.escape(article["name"])
-    theme = html.escape(article["theme"])
-    primary_href = href_for(article["primary"], preview_root)
-    modified = datetime.fromtimestamp(article["modified"]).strftime("%Y-%m-%d %H:%M")
+def collect_xhs_previews(preview_root):
+    """收集 output/preview/xhs/{文章}/{版本}/ 下的多图画廊。"""
+    previews = []
+    xhs_root = preview_root / "xhs"
+    if not xhs_root.is_dir():
+        return previews
+
+    for article_dir in xhs_root.iterdir():
+        if not article_dir.is_dir() or article_dir.name.startswith(("_", ".")):
+            continue
+        for variant_dir in article_dir.iterdir():
+            if not variant_dir.is_dir() or variant_dir.name.startswith(("_", ".")):
+                continue
+            manifest_path = variant_dir / "manifest.json"
+            gallery_path = variant_dir / "index.html"
+            if not manifest_path.is_file() or not gallery_path.is_file():
+                continue
+            try:
+                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+
+            related = [path for path in variant_dir.iterdir() if path.is_file()]
+            modified = max((path.stat().st_mtime for path in related), default=0)
+            variant = manifest.get("variant") or variant_dir.name
+            source_label = manifest.get("sourceLabel") or (
+                "公众号 HTML" if variant == "html" else "原始 Markdown"
+            )
+            caption = variant_dir / "caption.txt"
+            previews.append({
+                "kind": "xhs",
+                "name": manifest.get("title") or article_dir.name,
+                "primary": gallery_path,
+                "caption": caption if caption.is_file() else None,
+                "source_label": source_label,
+                "description": f'{manifest.get("size", "2160x2880")} · 共 {manifest.get("pages", 0)} 张',
+                "modified": modified,
+            })
+
+    return sorted(previews, key=lambda item: (-item["modified"], item["name"], item["source_label"]))
+
+
+def render_card(item, index, preview_root):
+    name = html.escape(item["name"])
+    primary_href = href_for(item["primary"], preview_root)
+    modified = datetime.fromtimestamp(item["modified"]).strftime("%Y-%m-%d %H:%M")
 
     extra_links = []
-    if article["clean"]:
-        extra_links.append(
-            f'<a class="secondary-link" href="{href_for(article["clean"], preview_root)}">干净 HTML</a>'
-        )
-    if article["markdown"]:
-        extra_links.append(
-            f'<a class="secondary-link" href="{href_for(article["markdown"], preview_root)}">Markdown</a>'
-        )
+    if item["kind"] == "gzh":
+        meta = f'公众号 · {item["theme"]}'
+        description = item["primary"].name
+        primary_label = "打开排版预览"
+        if item["clean"]:
+            extra_links.append(
+                f'<a class="secondary-link" href="{href_for(item["clean"], preview_root)}">干净 HTML</a>'
+            )
+        if item["markdown"]:
+            extra_links.append(
+                f'<a class="secondary-link" href="{href_for(item["markdown"], preview_root)}">Markdown</a>'
+            )
+    else:
+        meta = f'小红书 · {item["source_label"]}'
+        description = item["description"]
+        primary_label = "打开多图预览"
+        if item["caption"]:
+            extra_links.append(
+                f'<a class="secondary-link" href="{href_for(item["caption"], preview_root)}">发帖文案</a>'
+            )
     extras = "".join(extra_links)
 
     return f"""
       <article class="article-card">
         <div class="card-number">{index:02d}</div>
         <div class="card-content">
-          <div class="card-meta"><span>{theme}</span><time>{modified}</time></div>
+          <div class="card-meta"><span>{html.escape(meta)}</span><time>{modified}</time></div>
           <h2>{name}</h2>
-          <p>{html.escape(article['primary'].name)}</p>
+          <p>{html.escape(description)}</p>
           <div class="card-actions">
-            <a class="primary-link" href="{primary_href}">打开排版预览 <span aria-hidden="true">→</span></a>
+            <a class="primary-link" href="{primary_href}">{primary_label} <span aria-hidden="true">→</span></a>
             {extras}
           </div>
         </div>
       </article>"""
 
 
-def render_index(articles, preview_root):
+def render_index(items, preview_root):
     cards = "\n".join(
-        render_card(article, index, preview_root)
-        for index, article in enumerate(articles, start=1)
+        render_card(item, index, preview_root)
+        for index, item in enumerate(items, start=1)
     )
     if not cards:
         cards = """
       <section class="empty-state">
         <div class="empty-icon">AI</div>
-        <h2>还没有排版文章</h2>
-        <p>使用 gzh-design 生成第一篇文章后，这里会自动出现访问入口。</p>
+        <h2>还没有预览内容</h2>
+        <p>生成第一篇公众号排版或小红书多图后，这里会自动出现入口。</p>
       </section>"""
 
     latest = (
-        datetime.fromtimestamp(max(article["modified"] for article in articles)).strftime("%Y-%m-%d %H:%M")
-        if articles else "等待首篇文章"
+        datetime.fromtimestamp(max(item["modified"] for item in items)).strftime("%Y-%m-%d %H:%M")
+        if items else "等待首篇文章"
     )
-    count = len(articles)
+    article_count = len({item["name"] for item in items})
+    preview_count = len(items)
 
     return f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>公众号排版预览</title>
+  <title>内容预览中心</title>
   <style>
     * {{ box-sizing: border-box; }}
     body {{ margin: 0; color: #172033; background: #f5f8fc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }}
@@ -173,17 +230,18 @@ def render_index(articles, preview_root):
 </head>
 <body>
   <main class="page">
-    <div class="eyebrow">GZH PREVIEW</div>
-    <h1>公众号排版预览</h1>
-    <p class="intro">这里汇总 gzh-design 生成的文章。打开预览即可检查排版，并复制富文本到微信公众号编辑器。</p>
+    <div class="eyebrow">CONTENT PREVIEW</div>
+    <h1>内容预览中心</h1>
+    <p class="intro">统一查看公众号排版与小红书多图效果。公众号预览用于检查富文本排版；小红书预览按来源分别汇总全部卡片。</p>
     <section class="summary" aria-label="索引摘要">
-      <span>文章数量：<strong>{count}</strong></span>
+      <span>文章数量：<strong>{article_count}</strong></span>
+      <span>预览页面：<strong>{preview_count}</strong></span>
       <span>最近更新：<strong>{latest}</strong></span>
     </section>
-    <section class="article-list" aria-label="文章列表">
+    <section class="article-list" aria-label="预览列表">
 {cards}
     </section>
-    <footer>索引由 gzh-design 自动维护 · 主题开发目录不会显示在此页</footer>
+    <footer>公众号与小红书预览统一入口 · 点击卡片进入对应预览</footer>
   </main>
 </body>
 </html>
@@ -194,12 +252,12 @@ def build_index(workspace_root):
     workspace_root = Path(workspace_root).resolve()
     preview_root = workspace_root / "output" / "preview"
     preview_root.mkdir(parents=True, exist_ok=True)
-    articles = collect_articles(preview_root)
+    items = [*collect_articles(preview_root), *collect_xhs_previews(preview_root)]
     output = preview_root / "index.html"
     temporary = preview_root / ".index.html.tmp"
-    temporary.write_text(render_index(articles, preview_root), encoding="utf-8")
+    temporary.write_text(render_index(items, preview_root), encoding="utf-8")
     os.replace(temporary, output)
-    return output, len(articles)
+    return output, len(items)
 
 
 def main():
@@ -208,7 +266,7 @@ def main():
     args = parser.parse_args()
     root = Path(args.workspace_root).resolve() if args.workspace_root else find_workspace_root()
     output, count = build_index(root)
-    print(f"✓ 已更新公众号排版索引: {output}（{count} 篇）")
+    print(f"✓ 已更新统一预览入口: {output}（{count} 个预览）")
 
 
 if __name__ == "__main__":

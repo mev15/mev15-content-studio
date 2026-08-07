@@ -3,5 +3,6 @@
   "handle": "@your_handle",
   "verified": true,
   "avatar": "",
-  "footerNote": ""
+  "footerNote": "",
+  "htmlFontScale": 1.75
 }

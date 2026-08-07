@@ -84,9 +84,9 @@ def main():
     out_dir = os.path.dirname(os.path.abspath(out))
     os.makedirs(out_dir, exist_ok=True)
     open(out, "w", encoding="utf-8").write(out_html)
-    index_path, article_count = build_index(find_workspace_root(src))
+    index_path, preview_count = build_index(find_workspace_root(src))
     print(f"✓ 已生成带「复制」按钮的预览页: {out}")
-    print(f"✓ 已更新统一入口: {index_path}（{article_count} 篇）")
+    print(f"✓ 已更新统一入口: {index_path}（{preview_count} 个预览）")
     print("  用浏览器打开它，点右上角「复制到公众号」，再去公众号编辑器 Ctrl/⌘+V 粘贴。")
 
 

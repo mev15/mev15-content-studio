@@ -36,12 +36,24 @@ apt-get install -y fonts-noto-cjk fonts-noto-color-emoji
 ## 用法
 
 ```bash
-node scripts/render.mjs article.md --out ./cards
+node scripts/render.mjs article.md \
+  --preview-root <工作区>/output/preview \
+  --article-id article \
+  --variant markdown
+
+node scripts/render.mjs article.html \
+  --preview-root <工作区>/output/preview \
+  --article-id article \
+  --variant html
+
+# 独立目录模式
 node scripts/render.mjs article.md --out ./cards \
   --name 昵称 --handle "@X: xxx" --avatar avatar.png --no-verified --footer-note "文字"
 ```
 
-输出 `card-01.png`…（2160×2880）与 `manifest.json`。
+统一预览模式默认输出到 `<工作区>/output/preview/xhs/{文章}/{版本}/`，生成 `card-01.png`…（2160×2880）、`manifest.json`、整组画廊 `index.html`，并刷新 `<工作区>/output/preview/index.html`。画廊会自动读取同目录 `caption.txt`。
+
+HTML 输入会保留公众号排版主题，同时把内联 px 字号默认放大 1.75 倍（16px 正文约为 28px），避免直接套用公众号字号导致卡片文字过小。可用 `--html-font-scale <倍率>` 覆盖，或在 `config.json` 修改 `htmlFontScale`。
 
 ## 分页规则
 
@@ -49,6 +61,8 @@ node scripts/render.mjs article.md --out ./cards \
 - 其余按块级元素边界自动分页，不切断段落
 - 单个超高元素（长代码块、大图）独占一页并等比缩放
 - 文中本地图片自动内联为 data URL
+- HTML 全文只有一个顶层容器时会自动展开后分页，避免整篇缩成一张
+- 长页面逐张截图时锁定视口和滚动位置，确保每页头像、正文与页脚完整
 
 ## 改样式
 

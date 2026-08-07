@@ -106,7 +106,7 @@ description: 微信公众号文章排版引擎，将 Markdown 忠实转换为可
 - 用户提供的原稿保留原位，不擅自移动；本 skill **新生成或归一化**的 Markdown、干净排版 HTML、带复制按钮的预览 HTML 和相关素材，统一写入 `<WORKSPACE_ROOT>/output/preview/{文章标识}/`，一篇文章一个子目录。
 - `{文章标识}` 默认取原文件名或文章标题的稳定短名称。同一篇的 `{文章标识}.md`、`{文章标识}_排版_{主题中文名}({英文标识}).html`、`{文章标识}_排版_{主题中文名}({英文标识})_预览.html` 放在一起，便于预览、下载和后续清理。
 - 自定义主题的临时色板、明暗模式和组件对比页放入 `<WORKSPACE_ROOT>/output/preview/_theme-dev/{theme-id}/`；主题确认且不再频繁调试后，可归档到 `<WORKSPACE_ROOT>/output/archive/gzh-theme-debug/`。
-- `<WORKSPACE_ROOT>/output/preview/index.html` 是所有已生成文章的统一访问入口。索引只收录文章子目录，不收录 `_theme-dev/`；每次生成预览后必须自动刷新，不手工维护文章链接。
+- `<WORKSPACE_ROOT>/output/preview/index.html` 是公众号排版与小红书多图共用的统一访问入口。公众号文章仍放在文章子目录；XHS 画廊放在 `output/preview/xhs/{文章标识}/{版本}/`。索引不收录 `_theme-dev/`；每次生成预览后必须自动刷新，不手工维护文章链接，也不得覆盖已有 XHS 入口。
 - **不得默认写入 `wiki/outputs/`**。该目录属于知识库自动生成流程，只有用户明确点名要求时才能使用。
 - `<SKILL_ROOT>/assets/theme-previews/` 只存放已登记、可复用的主题区块库源码；面向用户查看或下载的主题开发副本写入工作区的 `output/preview/_theme-dev/`。
 
@@ -116,11 +116,11 @@ description: 微信公众号文章排版引擎，将 Markdown 忠实转换为可
    <SKILL_ROOT>/scripts/wrap_preview.py <上面的干净正文.html>
    ```
    默认在同一文章目录产出 `{...}_预览.html`——浏览器打开后右上角有「复制到公众号」按钮，点一下即把渲染后的富文本复制到剪贴板（等价 Ctrl+A/Ctrl+C），再到公众号编辑器 Ctrl/⌘+V 粘贴。按钮和脚本只在预览外壳里、**不在被复制的 section 内**，所以粘到公众号的仍是干净合规正文。只有用户明确给出第二个输出路径时才覆盖默认目录。
-3. **刷新统一索引**：`wrap_preview.py` 会自动重建 `<WORKSPACE_ROOT>/output/preview/index.html`。若未通过包装脚本生成预览，必须手动运行：
+3. **刷新统一索引**：`wrap_preview.py` 会自动重建 `<WORKSPACE_ROOT>/output/preview/index.html`，并扫描、保留 `output/preview/xhs/` 下已有的小红书画廊。若未通过包装脚本生成预览，必须手动运行：
    ```bash
    <SKILL_ROOT>/scripts/update_preview_index.py <WORKSPACE_ROOT>
    ```
-4. 告知用户：统一入口是 **`<WORKSPACE_ROOT>/output/preview/index.html`**；也可直接打开 `<WORKSPACE_ROOT>/output/preview/{文章标识}/{...}_预览.html`。给出同目录的干净正文文件路径作为兜底，并附校验脚本结论（已通过 / 剩余 warning）。
+4. 告知用户：统一入口是 **`<WORKSPACE_ROOT>/output/preview/index.html`**；它会同时列出公众号排版和 XHS 多图。也可直接打开 `<WORKSPACE_ROOT>/output/preview/{文章标识}/{...}_预览.html`。给出同目录的干净正文文件路径作为兜底，并附校验脚本结论（已通过 / 剩余 warning）。
 
 ## 生成时的智能处理
 

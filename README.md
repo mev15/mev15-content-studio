@@ -6,7 +6,7 @@
 
 ### `gzh-design`
 
-把 Markdown、Word、PDF 或纯文本整理并排成可直接复制到微信公众号编辑器的 HTML。内置主题组件库、微信兼容校验、文章预览与 `output/preview/index.html` 统一入口。
+把 Markdown、Word、PDF 或纯文本整理并排成可直接复制到微信公众号编辑器的 HTML。内置主题组件库、微信兼容校验、文章预览，以及与小红书多图共用的 `output/preview/index.html` 统一入口。
 
 本发行版额外包含两套已经固化、可直接选择的 AI 蓝色主题：
 
@@ -27,7 +27,7 @@
 
 ### `xhs-tweet-cards`
 
-把 Markdown / HTML 文章渲染成带 Twitter 壳（圆头像 + 昵称 + 蓝V + `@handle` + 页码）的小红书 3:4 图文卡片（2160×2880 PNG），并生成小红书发帖文案（标题 ≤20 字 + 正文 ≤1000 字 + 话题标签）。**原文保真**：内容只经 marked 确定性转换与 DOM 分页，不经 LLM 改写；`---` 为手动分页符，超高元素独占页等比缩放，本地图片自动内联。Playwright 本地渲染，需 `npm install`、chromium 与 Noto CJK 字体（见 skill 内 README）。
+把 Markdown / HTML 文章渲染成带 Twitter 壳（圆头像 + 昵称 + 蓝V + `@handle` + 页码）的小红书 3:4 图文卡片（2160×2880 PNG），并生成整组 HTML 画廊与小红书发帖文案（标题 ≤20 字 + 正文 ≤1000 字 + 话题标签）。产物默认写入 `output/preview/xhs/{文章}/{版本}/`，自动登记到与 gzh-design 共用的 `output/preview/index.html`。**原文保真**：内容只经 marked 确定性转换与 DOM 分页，不经 LLM 改写；HTML 内联字号会按卡片规格默认放大 1.75 倍，避免公众号 16px 正文在长图中过小。Playwright 本地渲染，需 `npm install`、chromium 与 Noto CJK 字体（见 skill 内 README）。
 
 ### `xhs-draft-publish`
 
