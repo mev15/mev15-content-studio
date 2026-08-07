@@ -29,7 +29,7 @@ description: 把 markdown 原稿一键转换并发布到 X (Twitter) Articles �
 | 无序/有序列表 | list-item（缩进转 depth，上限 2） | 嵌套渲染效果以 X 实际为准 |
 | `>` 引用 | blockquote | 一一对应 |
 | 相邻普通文本行 | 各自独立 unstyled block | 忠实保留中文长文源稿的物理分行，不拼成一个段落 |
-| 独立成行的 `![](...)` | atomic 图片块 | 非空 alt 写入原生 `caption`；API 不提供图注对齐字段，由 X 决定显示；仅 jpg/png/webp ≤ 5MB |
+| 独立成行的 `![](...)` | atomic 图片块 | 非空 alt 写入原生 `caption`；API 不提供图注对齐字段，由 X 决定显示；外链无扩展名时按 HTTP `Content-Type` 识别；仅 jpg/png/webp ≤ 5MB |
 | 行内图片 | 降级为 alt 文本 | 图片请独立成行 |
 | `---` 分割线 | 跳过并警告 | API 无 divider 元素 |
 

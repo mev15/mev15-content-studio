@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mdToPlan, parseInline } from './publish_article.ts';
+import { mdToPlan, normalizeRemoteImageFilename, parseInline } from './publish_article.ts';
 
 test('==highlight== is stripped and converted to bold', () => {
   const got = parseInline('使用 ==Paseo== 继续开发');
@@ -32,4 +32,11 @@ test('adjacent physical text lines remain separate blocks', () => {
     { text: '支付：使用 Bybit 卡。', type: 'unstyled' },
     { text: '总体来说，没有额外成本。', type: 'unstyled' },
   ]);
+});
+
+test('extensionless remote images use HTTP Content-Type', () => {
+  assert.equal(normalizeRemoteImageFilename('RoXNVkrYl5Rk37nEXPRE', 'image/png'), 'RoXNVkrYl5Rk37nEXPRE.png');
+  assert.equal(normalizeRemoteImageFilename('cover', 'image/jpeg; charset=binary'), 'cover.jpg');
+  assert.equal(normalizeRemoteImageFilename('already.webp', 'application/octet-stream'), 'already.webp');
+  assert.equal(normalizeRemoteImageFilename('unknown', 'application/octet-stream'), null);
 });

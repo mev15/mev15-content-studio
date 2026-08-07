@@ -17,6 +17,11 @@ const AUTHORIZE_URL = 'https://x.com/i/oauth2/authorize';
 const SCOPES = 'tweet.read tweet.write users.read media.write offline.access';
 const IMAGE_MAX_BYTES = 5 * 1024 * 1024; // X 图片上限 5MB
 const IMAGE_EXT_WHITELIST = new Set(['jpg', 'jpeg', 'png', 'webp']); // Articles 拒收 GIF/视频
+const IMAGE_CONTENT_TYPE_EXT = new Map([
+  ['image/jpeg', 'jpg'],
+  ['image/png', 'png'],
+  ['image/webp', 'webp'],
+]);
 const CONFIG_DIR = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'x-publish');
 const TOKENS_PATH = join(CONFIG_DIR, 'tokens.json');
 
@@ -58,6 +63,16 @@ export function parseEnvFile(text: string): Record<string, string> {
     out[line.slice(0, eq).trim()] = val;
   }
   return out;
+}
+
+/** 为无扩展名/错误扩展名的外链图片按 HTTP Content-Type 补出可上传文件名 */
+export function normalizeRemoteImageFilename(filename: string, contentType: string): string | null {
+  const ext = extname(filename).slice(1).toLowerCase();
+  if (IMAGE_EXT_WHITELIST.has(ext)) return filename;
+  const inferred = IMAGE_CONTENT_TYPE_EXT.get(contentType.split(';', 1)[0].trim().toLowerCase());
+  if (!inferred) return null;
+  const stem = basename(filename, extname(filename)) || 'image';
+  return `${stem}.${inferred}`;
 }
 
 interface InlineResult { text: string; styles: StyleRange[]; links: { offset: number; length: number; url: string }[] }
@@ -407,6 +422,9 @@ async function fetchImageBytes(src: string, mdDir: string): Promise<{ bytes: Buf
     if (!res.ok) return null;
     bytes = Buffer.from(await res.arrayBuffer());
     filename = basename(new URL(src).pathname) || 'image';
+    const normalized = normalizeRemoteImageFilename(filename, res.headers.get('content-type') ?? '');
+    if (!normalized) return null;
+    filename = normalized;
   } else if (src.startsWith('data:')) {
     return null;
   } else {
