@@ -1,6 +1,6 @@
 # Mev15 Content Studio
 
-面向中文内容创作的 Codex 插件包：微信公众号排版 + 青十五文章配图 + 公众号草稿箱发布。
+面向中文内容创作的 Codex 插件包：微信公众号排版 + 青十五文章配图 + 公众号草稿箱发布 + X (Twitter) Articles 草稿箱发布。
 
 ## 包含的 skills
 
@@ -21,6 +21,10 @@
 
 把排版好的公众号 HTML（正文配图为图床外链）和封面图一键同步到公众号**草稿箱**：自动下载正文外链图片、上传微信素材库并替换为微信 CDN 链接，封面上传为永久素材，最后创建草稿。直连微信官方 API（需自己的 AppID/AppSecret，且运行机器出口 IP 已加公众号后台白名单），零第三方服务、零 npm 依赖（Node ≥ 22.6）。只写草稿箱，不群发、不正式发布。凭据配置：按 skill 内 `env.example` 模板复制到 `~/.config/gzh-publish/env`（本仓库不存放任何凭据）。
 
+### `x-publish`
+
+把文章 **markdown 原稿**转换并发布到 X (Twitter) Articles **草稿箱**：自动做 md → content_state（DraftJS）结构转换，代码块转 blockquote、表格改写为列表、正文图片与封面上传为 X 媒体，最后调官方 `POST /2/articles/draft` 创建草稿。直连 X 官方 API（OAuth 2.0 PKCE；发布账号需 X Premium，开发者 App 按量计费），零 npm 依赖（Node ≥ 22.6）。只写草稿箱，不正式发布。凭据配置：按 skill 内 `env.example` 模板复制到 `~/.config/x-publish/env` 后运行一次 `--login`（本仓库不存放任何凭据）。
+
 ## 安装
 
 ### Codex plugin（推荐）
@@ -36,13 +40,14 @@ codex plugin add mev15-content-studio@mev15
 
 ### 只复制 skills
 
-不使用 plugin 功能时，也可以直接安装两个 skill：
+不使用 plugin 功能时，也可以直接复制安装各个 skill：
 
 ```bash
 mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills"
 cp -R plugins/mev15-content-studio/skills/gzh-design "${CODEX_HOME:-$HOME/.codex}/skills/"
 cp -R plugins/mev15-content-studio/skills/qing-shiwu-illustrations "${CODEX_HOME:-$HOME/.codex}/skills/"
 cp -R plugins/mev15-content-studio/skills/gzh-publish "${CODEX_HOME:-$HOME/.codex}/skills/"
+cp -R plugins/mev15-content-studio/skills/x-publish "${CODEX_HOME:-$HOME/.codex}/skills/"
 ```
 
 ### Claude Code
@@ -54,6 +59,7 @@ mkdir -p ~/.claude/skills
 cp -R plugins/mev15-content-studio/skills/gzh-design ~/.claude/skills/
 cp -R plugins/mev15-content-studio/skills/qing-shiwu-illustrations ~/.claude/skills/
 cp -R plugins/mev15-content-studio/skills/gzh-publish ~/.claude/skills/
+cp -R plugins/mev15-content-studio/skills/x-publish ~/.claude/skills/
 ```
 
 ## 使用示例
@@ -72,6 +78,10 @@ Use $qing-shiwu-illustrations 处理 article.md，并生成多平台封面。
 
 ```text
 Use $gzh-publish 把 article.html 和 cover.jpg 发布到公众号草稿箱，标题《……》。
+```
+
+```text
+Use $x-publish 把 article.md 和 x-cover.jpg 发布到 X Articles 草稿箱。
 ```
 
 ## 更新
@@ -93,6 +103,6 @@ codex plugin add mev15-content-studio@mev15
 
 - `gzh-design` 基于 [`isjiamu/gzh-design-skill`](https://github.com/isjiamu/gzh-design-skill)，按 GNU AGPL-3.0-or-later 发布，并保留原作者声明。
 - `qing-shiwu-illustrations` 基于 Ian Xiaohei Illustrations，保留 MIT License 与 Ian 的署名要求。
-- `gzh-publish` 为本仓库原创组件，按仓库根许可证 GNU AGPL-3.0-or-later 发布。
+- `gzh-publish` 与 `x-publish` 为本仓库原创组件，按仓库根许可证 GNU AGPL-3.0-or-later 发布。
 
 完整说明见 [NOTICE.md](NOTICE.md) 与 [LICENSES](LICENSES)。仓库根目录的默认许可证为 GNU AGPL-3.0-or-later；各独立组件目录中的许可证继续适用于对应组件。
