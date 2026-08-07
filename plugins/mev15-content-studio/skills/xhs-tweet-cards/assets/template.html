@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --ink: #0f1419;          /* Twitter 正文黑 */
+    --muted: #536471;        /* Twitter 次要灰 */
+    --line: #eff3f4;         /* Twitter 分隔线 */
+    --accent: #1d9bf0;       /* Twitter 蓝 */
+    --card-w: 1080px;
+    --card-h: 1440px;
+    --pad-x: 64px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #e8ebee; }
+  body {
+    font-family: "Noto Sans CJK SC", "PingFang SC", "Helvetica Neue", Arial, "Noto Color Emoji", sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* ---------- 卡片骨架 ---------- */
+  .card {
+    position: relative;
+    width: var(--card-w);
+    height: var(--card-h);
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    padding: 56px var(--pad-x) 30px;
+    flex: none;
+  }
+  .avatar {
+    width: 92px; height: 92px;
+    border-radius: 50%;
+    flex: none;
+    object-fit: cover;
+    background: #d8dde2;
+  }
+  .avatar-fallback {
+    width: 92px; height: 92px;
+    border-radius: 50%;
+    flex: none;
+    background: var(--accent);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; font-weight: 700;
+  }
+  .id-block { min-width: 0; }
+  .name-row { display: flex; align-items: center; gap: 10px; }
+  .display-name {
+    font-size: 34px; font-weight: 700; line-height: 1.25;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .badge { width: 34px; height: 34px; flex: none; fill: var(--accent); }
+  .handle {
+    font-size: 27px; color: var(--muted); line-height: 1.35;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .more-dots { margin-left: auto; color: var(--muted); font-size: 34px; letter-spacing: 3px; flex: none; }
+
+  /* ---------- 正文区 ---------- */
+  .card-body {
+    flex: 1 1 auto;
+    padding: 6px var(--pad-x) 0;
+    overflow: hidden;
+  }
+  .prose > * { margin-bottom: 26px; }
+  .prose p, .prose li {
+    font-size: 30px;
+    line-height: 1.72;
+    overflow-wrap: break-word;
+  }
+  .prose h1 { font-size: 44px; line-height: 1.4; font-weight: 700; margin-bottom: 30px; }
+  .prose h2 { font-size: 37px; line-height: 1.45; font-weight: 700; margin-top: 8px; }
+  .prose h3 { font-size: 32px; line-height: 1.5; font-weight: 700; }
+  .prose strong { font-weight: 700; }
+  .prose em { font-style: italic; }
+  .prose a { color: var(--accent); text-decoration: none; }
+  .prose ul, .prose ol { padding-left: 44px; }
+  .prose li { margin-bottom: 12px; }
+  .prose li:last-child { margin-bottom: 0; }
+  .prose blockquote {
+    border-left: 8px solid var(--line);
+    padding: 6px 0 6px 30px;
+    color: var(--muted);
+  }
+  .prose blockquote p { color: inherit; }
+  .prose code {
+    font-family: "SFMono-Regular", Menlo, Consolas, "Noto Sans Mono CJK SC", monospace;
+    font-size: 0.86em;
+    background: #f4f6f8;
+    border-radius: 8px;
+    padding: 3px 10px;
+  }
+  .prose pre {
+    background: #f7f9fa;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 26px 30px;
+    overflow: hidden;
+  }
+  .prose pre code {
+    background: none; padding: 0;
+    font-size: 24px; line-height: 1.6;
+    white-space: pre-wrap; overflow-wrap: break-word;
+  }
+  .prose img {
+    max-width: 100%;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+    display: block;
+  }
+  .prose hr { display: none; }
+  .prose table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 26px;
+  }
+  .prose th, .prose td {
+    border: 1px solid var(--line);
+    padding: 14px 18px;
+    text-align: left;
+    line-height: 1.5;
+  }
+  .prose th { background: #f7f9fa; font-weight: 700; }
+
+  /* ---------- 页脚 ---------- */
+  .card-footer {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 26px var(--pad-x) 0;
+    padding: 26px 0 48px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 26px;
+  }
+  .page-no { font-variant-numeric: tabular-nums; }
+
+  /* ---------- 测量容器（移出视野） ---------- */
+  #measure {
+    position: absolute;
+    left: -99999px;
+    top: 0;
+    width: calc(var(--card-w) - 2 * var(--pad-x));
+  }
+
+  /* 超高元素独占页时的缩放包裹 */
+  .fit-shrink { transform-origin: top left; }
+</style>
+</head>
+<body>
+  <div id="measure" class="prose"></div>
+  <div id="stage"></div>
+
+  <template id="card-template">
+    <div class="card">
+      <div class="card-header">
+        <!-- AVATAR_SLOT -->
+        <div class="id-block">
+          <div class="name-row">
+            <span class="display-name"></span>
+            <svg class="badge" viewBox="0 0 24 24" aria-hidden="true" style="display:none"><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"/></svg>
+          </div>
+          <div class="handle"></div>
+        </div>
+        <div class="more-dots">···</div>
+      </div>
+      <div class="card-body prose"></div>
+      <div class="card-footer">
+        <span class="footer-note"></span>
+        <span class="page-no"></span>
+      </div>
+    </div>
+  </template>
+</body>
+</html>

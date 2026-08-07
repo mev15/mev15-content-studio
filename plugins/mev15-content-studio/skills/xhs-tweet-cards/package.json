@@ -1,0 +1,12 @@
+{
+  "name": "xhs-tweet-cards",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "把 Markdown/HTML 渲染成带 Twitter 壳的小红书 3:4 多图卡片",
+  "license": "MIT",
+  "dependencies": {
+    "marked": "^18.0.9",
+    "playwright": "^1.62.1"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "xhs-draft-publish",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "短信登录小红书创作平台并把图文卡片存入草稿箱（只存草稿，不发布）",
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "^1.62.1"
+  }
+}

@@ -25,6 +25,14 @@
 
 把文章 **markdown 原稿**转换并发布到 X (Twitter) Articles **草稿箱**：自动做 md → content_state（DraftJS）结构转换，代码块转 blockquote、表格改写为列表、正文图片与封面上传为 X 媒体，最后调官方 `POST /2/articles/draft` 创建草稿。直连 X 官方 API（OAuth 2.0 PKCE；发布账号需 X Premium，开发者 App 按量计费），零 npm 依赖（Node ≥ 22.6）。只写草稿箱，不正式发布。凭据配置：按 skill 内 `env.example` 模板复制到 `~/.config/x-publish/env` 后运行一次 `--login`（本仓库不存放任何凭据）。
 
+### `xhs-tweet-cards`
+
+把 Markdown / HTML 文章渲染成带 Twitter 壳（圆头像 + 昵称 + 蓝V + `@handle` + 页码）的小红书 3:4 图文卡片（2160×2880 PNG），并生成小红书发帖文案（标题 ≤20 字 + 正文 ≤1000 字 + 话题标签）。**原文保真**：内容只经 marked 确定性转换与 DOM 分页，不经 LLM 改写；`---` 为手动分页符，超高元素独占页等比缩放，本地图片自动内联。Playwright 本地渲染，需 `npm install`、chromium 与 Noto CJK 字体（见 skill 内 README）。
+
+### `xhs-draft-publish`
+
+把 `xhs-tweet-cards` 的产物（卡片 + 文案）存入小红书创作服务平台**草稿箱**：短信验证码登录（验证码经 `.state/code.txt` 交接，无需浏览器界面；登录态本地 0600 保存），自动上传图片、填标题正文、点"存草稿"，每步截图落盘。只写草稿箱，不发布——脚本中不存在点击发布按钮的代码路径。与 `gzh-publish` / `x-publish` 不同：小红书没有面向个人创作者的官方内容 API，此 skill 走浏览器自动化，属平台条款灰区，使用前请阅读 skill 内风控须知（建议先用测试号、保持人类量级节奏）。
+
 ## 安装
 
 ### Codex plugin（推荐）
