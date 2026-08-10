@@ -211,7 +211,7 @@ function renderPage(page, index, total, profile, avatar, baseDir) {
     const tags = Array.isArray(page.tags) && page.tags.length
       ? `<div class="tag-row">${page.tags.slice(0, 5).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>`
       : "";
-    const body = `<div class="page-body cover-body"><div class="cover-mark">Q15</div><div class="cover-copy"><h1 class="cover-title">${formatInline(page.title)}</h1>${page.subtitle ? `<p class="cover-subtitle">${formatInline(page.subtitle)}</p>` : ""}</div>${tags}</div>`;
+    const body = `<div class="page-body cover-body"><div class="cover-copy"><h1 class="cover-title">${formatInline(page.title)}</h1>${page.subtitle ? `<p class="cover-subtitle">${formatInline(page.subtitle)}</p>` : ""}</div>${tags}</div>`;
     return pageChrome(page, index, total, profile, avatar, body);
   }
 
