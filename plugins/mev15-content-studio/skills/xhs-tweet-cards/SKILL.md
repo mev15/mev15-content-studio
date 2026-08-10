@@ -1,6 +1,6 @@
 ---
 name: xhs-tweet-cards
-description: 把 Markdown/HTML 文章渲染成带 Twitter 壳（头像+昵称+蓝V+@handle）的小红书 3:4 多图卡片，生成配套发帖文案、整组 HTML 画廊，并登记到 output/preview/index.html 统一入口。原文保真：内容不经 LLM 改写，只做确定性排版分页。触发词："小红书多图"、"tweet 卡片"、"推文卡片"、"文章转卡片"、"xhs cards"。
+description: 把 Markdown/HTML 文章渲染成带 Twitter 壳（头像+昵称+蓝V+@handle）的小红书 3:4 多图卡片，固定使用 864×1152 逻辑画布、34px 正文和 2.5× 高清导出，自动归一化公众号 HTML 的列表、字号和分页留白，默认将成图控制在 15 张以内；支持用环境变量配置身份信息。生成配套发帖文案、整组 HTML 画廊，并把当前文章最新的 Markdown 与 HTML 版本各一套登记到 output/preview/index.html。原文保真：内容不经 LLM 改写，只做确定性排版分页。触发词："小红书多图"、"tweet 卡片"、"推文卡片"、"文章转卡片"、"xhs cards"。
 ---
 
 # xhs-tweet-cards：文章 → 推文壳小红书多图 + 发帖文案
@@ -19,20 +19,18 @@ description: 把 Markdown/HTML 文章渲染成带 Twitter 壳（头像+昵称+�
 
 ### 1. 配置检查（首次使用必做）
 
-读取 `config.json`（本 skill 根目录）。若 `displayName` 仍为占位值「你的昵称」，提醒用户配置：
+配置优先级固定为：命令行参数 > 进程环境变量 > skill 根目录 `.env` > `config.json`。若身份仍为占位值，提醒用户配置。推荐复制 `.env.example` 为 `.env`：
 
-```json
-{
-  "displayName": "昵称",
-  "handle": "@X: your_handle",
-  "verified": true,
-  "avatar": "/path/to/avatar.png",
-  "footerNote": "",
-  "htmlFontScale": 1.75
-}
+```dotenv
+XHS_TWEET_CARDS_DISPLAY_NAME=昵称
+XHS_TWEET_CARDS_HANDLE=your_handle
+XHS_TWEET_CARDS_AVATAR=/absolute/path/to/avatar.jpg
+XHS_TWEET_CARDS_VERIFIED=true
+XHS_TWEET_CARDS_FOOTER_NOTE=
+XHS_TWEET_CARDS_HTML_FONT_SCALE=2.125
 ```
 
-头像支持 png/jpg/webp，缺省时用昵称首字的蓝底圆形占位。用户临时覆盖用命令行参数即可，不必改文件。
+头像支持 png/jpg/webp，handle 可写 `mev15_eth` 或 `@mev15_eth`，渲染时统一显示为 `@mev15_eth`。缺省头像时用昵称首字的蓝底圆形占位。可用 `--env-file <路径>` 指定其他 env 文件。
 
 ### 2. 确定统一预览目录（强制）
 
@@ -45,6 +43,7 @@ description: 把 Markdown/HTML 文章渲染成带 Twitter 壳（头像+昵称+�
 - `{文章标识}` 默认取原稿文件名的稳定短名称；同一篇 Markdown 与 HTML 必须使用同一个标识。
 - `{版本}` 使用 `markdown`、`html` 或其他能明确区分来源的短名称。
 - 不再把面向用户的预览默认写到 `output/xhs-preview/`；只有用户明确指定 `--out` 时才走独立目录模式。
+- 统一入口中的小红书区域只展示最近处理文章的最新 Markdown 版与最新 HTML 版，各来源最多一套；公众号预览不受影响。旧测试变体不会继续堆在入口中。
 
 ### 3. 渲染
 
@@ -63,17 +62,18 @@ node <skill根目录>/scripts/render.mjs <input.html> \
 node <skill根目录>/scripts/render.mjs <input.md> --out <输出目录>
 ```
 
-- 可选覆盖：`--name`、`--handle`、`--avatar`、`--no-verified`、`--footer-note`、`--title`、`--source-label`。
+- 可选覆盖：`--name`、`--handle`、`--avatar`、`--no-verified`、`--footer-note`、`--env-file`、`--title`、`--source-label`。
 - 输入 `.md` 经 marked（gfm + breaks）确定性转换。
-- 输入 `.html/.htm` 保留主题、颜色、内容块和字号层级；自动展开包裹全文的单一顶层容器，并默认把内联 px 字号放大 `1.75` 倍以适配 1080px 卡片（公众号正文 `16px` → 卡片 `28px`，图注 `12px` → `21px`）。需要微调时传 `--html-font-scale <倍率>`；不要直接保留公众号 16px，否则卡片正文会明显过小。
-- **分页规则**：按块级元素边界自动分页；Markdown 中单独一行 `---` 为强制分页符（作者控制切点）；单个超高元素（长代码块/大图）独占一页并等比缩放
+- 固定设计令牌：逻辑画布 `864×1152`、正文 `34px`、行高 `1.65`、左右边距 `42px`；以 `2.5×` 导出 `2160×2880`。保持正文视觉大小，通过紧凑页眉页脚、块间距和分页利用率把常规长文控制在 15 张以内。
+- 输入 `.html/.htm` 时保留颜色、强调、章节标题、代码和媒体；移除造成分页浪费的公众号白色卡片外壳，把长列表拆回可分页的条目，并统一数字序号的网格、字号和首行对齐。默认把内联 `16px` 正文归一到 `34px`。
+- **分页规则**：按可读块边界自动分页；标题与下一块保持同页，图片与图注保持同页；Markdown 中单独一行 `---` 为强制分页符；单个真正超高的代码块或图片才允许独占页并等比缩放。
 - 文中本地图片引用会自动内联；远程图片需网络可达
 - 渲染完成会自动生成本组 `index.html`，并重建 `<WORKSPACE_ROOT>/output/preview/index.html`；索引同时扫描公众号排版和 XHS 画廊，不得手工拼接链接。
-- 小红书单帖最多 18 张图，超出时建议用户精简或拆帖
+- 内容目标为不超过 15 张；16–18 张视为分页质量不达标，优先检查原子容器、列表拆分和异常留白，不缩小 34px 正文。平台硬上限仍为 18 张。
 
 ### 4. 出图质量自检（必做）
 
-用 Read 查看第一张与最后一张 PNG，确认：每页头像/昵称页眉完整、页码完整、无文字溢出或截断、页尾无异常大片空白、中文与 emoji 渲染正常。HTML 输入还要确认正文大小接近 Markdown 版，而不是公众号原始 16px 的微缩效果。发现溢出通常是模板样式与测量不同步导致——检查 `assets/template.html` 中内容样式是否都挂在 `.prose` 选择器下（测量容器依赖它）。
+查看整组画廊以及第一张、列表页、图片页和最后一张原图，确认：尺寸为 2160×2880、身份信息正确、页码完整、无截断、无异常大片留白。读取 `manifest.json` 的 `fillRatios`：除纯媒体页和末页外，低于 60% 的页面必须复查。HTML 输入还要确认正文为统一 34px，数字序号与首行对齐，列表没有因整块缩放而变小。
 
 ### 5. 撰写小红书文案（写入 `<输出目录>/caption.txt`）
 
@@ -93,6 +93,6 @@ node <skill根目录>/scripts/render.mjs <input.md> --out <输出目录>
 
 - 渲染引擎：Playwright chromium headless（`--no-sandbox`），依赖已在 skill 目录 `npm install`
 - 字体：Noto Sans CJK SC + Noto Color Emoji（系统级，已安装）
-- 样式基调：Twitter 官方配色（#0f1419 / #536471 / #1d9bf0），观感对齐 write-then-publish（MIT）的推文壳
+- 样式基调：Twitter 官方配色（#0f1419 / #536471 / #1d9bf0）；正文视觉比例对齐 write-then-publish（MIT）的 864px 画布 / 34px 正文基准
 - 修改卡片样式改 `assets/template.html`；**改内容排版样式必须用 `.prose` 前缀选择器**，否则分页测量失准
 - `assets/gallery.html` 是整组卡片画廊模板；统一索引由 `render.mjs` 扫描 `output/preview/` 后确定性重建

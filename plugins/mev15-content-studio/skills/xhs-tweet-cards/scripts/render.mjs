@@ -19,10 +19,13 @@ import {
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 
 const SKILL_DIR = resolve(dirname(new URL(import.meta.url).pathname), "..");
-const CARD_W = 1080;
-const CARD_H = 1440;
-const SCALE = 2;
-const DEFAULT_HTML_FONT_SCALE = 1.75;
+// 固定逻辑排版坐标；导出倍率只负责清晰度，不参与文章间的字号调节。
+// 正文 34 / 864 = 3.94%，与 write-then-publish 的默认视觉比例一致。
+const CARD_W = 864;
+const CARD_H = 1152;
+const SCALE = 2.5;
+const DEFAULT_HTML_FONT_SCALE = 2.125;
+const TARGET_MAX_PAGES = 15;
 
 function parseArgs(argv) {
   const args = { _: [] };
@@ -63,6 +66,34 @@ function positiveNumber(value, fallback) {
   return Number.isFinite(number) && number > 0 ? number : fallback;
 }
 
+function parseBoolean(value, fallback) {
+  if (value === undefined || value === null || value === "") return fallback;
+  return !/^(0|false|no|off)$/i.test(String(value).trim());
+}
+
+function readEnvFile(filePath) {
+  if (!existsSync(filePath)) return {};
+  const values = {};
+  for (const rawLine of readFileSync(filePath, "utf-8").split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith("#")) continue;
+    const match = line.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
+    if (!match) continue;
+    let value = match[2].trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    values[match[1]] = value;
+  }
+  return values;
+}
+
+function normalizeHandle(value) {
+  const handle = String(value || "").trim();
+  if (!handle) return "@handle";
+  return handle.startsWith("@") ? handle : `@${handle}`;
+}
+
 function toDataUrl(filePath) {
   const mime = {
     ".png": "image/png",
@@ -90,7 +121,7 @@ function inlineLocalImages(html, baseDir) {
   });
 }
 
-/** 公众号 HTML 常用 16px 正文；在 1080px 卡片上按比例提升到约 28px。 */
+/** 公众号 HTML 常用 16px 正文；归一到 864px 逻辑画布上的 34px 阅读基准。 */
 function scaleHtmlFontSizes(html, factor) {
   if (factor === 1) return html;
   return html.replace(/(font-size\s*:\s*)(\d+(?:\.\d+)?)px/gi, (match, prefix, rawSize) => {
@@ -171,11 +202,13 @@ function collectXhsEntries(previewRoot) {
       }
       const variant = manifest.variant || basename(variantDir);
       const sourceLabel = manifest.sourceLabel || (variant === "html" ? "公众号 HTML" : "原始 Markdown");
-      const related = readdirSync(variantDir).map((name) => join(variantDir, name));
-      const modified = Math.max(...related.map(mtime), 0);
+      // “最新”按本次渲染生成的 manifest 判断；后来补写旧 caption 不应把旧方案顶回入口。
+      const modified = mtime(manifestPath);
       const captionPath = join(variantDir, "caption.txt");
       entries.push({
         kind: "xhs",
+        articleId: manifest.articleId || basename(articleDir),
+        inputType: manifest.inputType || (variant === "html" ? "html" : "markdown"),
         article: manifest.title || basename(articleDir),
         meta: `小红书 · ${sourceLabel}`,
         modified,
@@ -187,7 +220,19 @@ function collectXhsEntries(previewRoot) {
       });
     }
   }
-  return entries.sort((a, b) => b.modified - a.modified || a.article.localeCompare(b.article));
+  // 统一入口只保留最近处理文章的最新来源版本：Markdown 与 HTML 各最多一套。
+  // 这样同一次对照预览不会互相顶掉，旧测试变体也不会继续堆在入口里。
+  const sorted = entries.sort((a, b) => b.modified - a.modified || a.article.localeCompare(b.article));
+  if (!sorted.length) return sorted;
+  const latestArticleId = sorted[0].articleId;
+  const latestByInputType = new Map();
+  for (const entry of sorted) {
+    if (entry.articleId !== latestArticleId || latestByInputType.has(entry.inputType)) continue;
+    latestByInputType.set(entry.inputType, entry);
+  }
+  const inputOrder = { markdown: 0, html: 1 };
+  return [...latestByInputType.values()].sort((a, b) =>
+    (inputOrder[a.inputType] ?? 9) - (inputOrder[b.inputType] ?? 9));
 }
 
 function previewCard(entry, index) {
@@ -260,7 +305,7 @@ function writeUnifiedPreviewIndex(previewRoot) {
   <main class="page">
     <div class="eyebrow">CONTENT PREVIEW</div>
     <h1>内容预览中心</h1>
-    <p class="intro">统一查看公众号排版与小红书多图效果。公众号预览用于检查富文本排版；小红书预览按来源分别汇总全部卡片。</p>
+    <p class="intro">统一查看公众号排版与小红书多图效果。公众号预览用于检查富文本排版；小红书区域保留当前文章最新的 Markdown 与 HTML 版本各一套。</p>
     <section class="summary" aria-label="索引摘要">
       <span>文章数量：<strong>${articleCount}</strong></span>
       <span>预览页面：<strong>${entries.length}</strong></span>
@@ -269,7 +314,7 @@ function writeUnifiedPreviewIndex(previewRoot) {
     <section class="article-list" aria-label="预览列表">
 ${cards}
     </section>
-    <footer>公众号与小红书预览统一入口 · 点击卡片进入对应预览</footer>
+    <footer>公众号预览与当前文章最新的小红书多图 · 点击卡片进入对应预览</footer>
   </main>
 </body>
 </html>
@@ -308,7 +353,7 @@ function writeGallery(outDir, options) {
 const args = parseArgs(process.argv.slice(2));
 const inputPath = args._[0];
 if (!inputPath) {
-  console.error("用法: node render.mjs <input.md|input.html> [--out DIR | --preview-root DIR --article-id ID --variant NAME] [--html-font-scale 1.75] [--name ..] [--handle ..] [--avatar ..] [--no-verified]");
+  console.error("用法: node render.mjs <input.md|input.html> [--out DIR | --preview-root DIR --article-id ID --variant NAME] [--env-file FILE] [--html-font-scale 2.125] [--name ..] [--handle ..] [--avatar ..] [--no-verified]");
   process.exit(2);
 }
 
@@ -316,6 +361,9 @@ const input = resolve(inputPath);
 const isHtml = /\.html?$/i.test(input);
 const configPath = args.config ? resolve(args.config) : join(SKILL_DIR, "config.json");
 const config = existsSync(configPath) ? JSON.parse(readFileSync(configPath, "utf-8")) : {};
+const envFilePath = args["env-file"] ? resolve(args["env-file"]) : join(SKILL_DIR, ".env");
+const fileEnv = readEnvFile(envFilePath);
+const envValue = (name) => process.env[name] ?? fileEnv[name];
 const previewRoot = args["preview-root"] ? resolve(args["preview-root"]) : null;
 const inferredArticleId = basename(input, extname(input)).replace(/_排版_.+$/, "");
 const articleId = safeSegment(args["article-id"] || inferredArticleId, "untitled");
@@ -325,14 +373,19 @@ const outDir = resolve(args.out || (previewRoot
   : join(dirname(input), "xhs-cards")));
 const title = args.title || articleId;
 const sourceLabel = args["source-label"] || (isHtml ? "公众号 HTML" : "原始 Markdown");
-const htmlFontScale = positiveNumber(args["html-font-scale"] ?? config.htmlFontScale, DEFAULT_HTML_FONT_SCALE);
+const htmlFontScale = positiveNumber(
+  args["html-font-scale"] ?? envValue("XHS_TWEET_CARDS_HTML_FONT_SCALE") ?? config.htmlFontScale,
+  DEFAULT_HTML_FONT_SCALE,
+);
 
 const profile = {
-  displayName: args.name || config.displayName || "未命名作者",
-  handle: args.handle || config.handle || "@handle",
-  verified: args.verified !== undefined ? args.verified : config.verified !== false,
-  avatar: args.avatar || config.avatar || "",
-  footerNote: args["footer-note"] ?? config.footerNote ?? "",
+  displayName: args.name || envValue("XHS_TWEET_CARDS_DISPLAY_NAME") || config.displayName || "未命名作者",
+  handle: normalizeHandle(args.handle || envValue("XHS_TWEET_CARDS_HANDLE") || config.handle),
+  verified: args.verified !== undefined
+    ? args.verified
+    : parseBoolean(envValue("XHS_TWEET_CARDS_VERIFIED"), config.verified !== false),
+  avatar: args.avatar || envValue("XHS_TWEET_CARDS_AVATAR") || config.avatar || "",
+  footerNote: args["footer-note"] ?? envValue("XHS_TWEET_CARDS_FOOTER_NOTE") ?? config.footerNote ?? "",
 };
 
 const raw = readFileSync(input, "utf-8");
@@ -360,6 +413,77 @@ await page.evaluate(({ html, unwrapRoot }) => {
     const root = measure.firstElementChild;
     if (/^(SECTION|DIV|MAIN|ARTICLE)$/.test(root.tagName) && root.children.length > 1) {
       root.replaceWith(...Array.from(root.children));
+    }
+  }
+
+  if (!unwrapRoot) return;
+
+  // 公众号主题的白色卡片容器在 3:4 分页里会形成大块原子元素：既浪费页尾，
+  // 又会触发整块缩放。只移除这些外壳，保留内部颜色、强调、图片和标题结构。
+  const isSurfaceCard = (element) => {
+    if (!/^(SECTION|DIV|ARTICLE)$/.test(element.tagName)) return false;
+    const style = element.getAttribute("style") || "";
+    return /box-shadow\s*:/i.test(style)
+      && /background\s*:\s*#(?:fff|ffffff)\b/i.test(style)
+      && !/background\s*:\s*#1e293b\b/i.test(style);
+  };
+  for (const element of [...measure.children]) {
+    if (!isSurfaceCard(element)) continue;
+    const fragment = document.createDocumentFragment();
+    for (const child of [...element.children]) fragment.appendChild(child);
+    element.replaceWith(fragment);
+  }
+
+  // 归一化公众号自定义数字列表：固定两列网格，让圆形序号与首行文字稳定对齐。
+  for (const row of measure.querySelectorAll('section[style*="display:flex"][style*="align-items:flex-start"]')) {
+    const marker = row.firstElementChild;
+    const body = marker?.nextElementSibling;
+    if (!marker || body?.tagName !== "P" || !/^\d+$/.test((marker.textContent || "").trim())) continue;
+    row.classList.add("xhs-list-row");
+    marker.classList.add("xhs-list-marker");
+  }
+
+  for (const heading of measure.querySelectorAll('section[style*="display:flex"][style*="align-items:center"]')) {
+    heading.classList.add("xhs-section-heading", "xhs-keep-next");
+  }
+
+  for (const paragraph of measure.querySelectorAll("p")) {
+    const style = getComputedStyle(paragraph);
+    const inline = paragraph.getAttribute("style") || "";
+    const insideHeading = Boolean(paragraph.closest(".xhs-section-heading"));
+    const insideCode = /mono/i.test(style.fontFamily)
+      || Boolean(paragraph.closest('[style*="background:#1E293B"], [style*="background:#0F172A"]'));
+    const isCaption = !insideHeading && !insideCode
+      && style.textAlign === "center"
+      && parseFloat(style.fontSize) <= 27;
+    if (isCaption) paragraph.classList.add("xhs-caption");
+    else if (!insideHeading && !insideCode) paragraph.classList.add("xhs-html-body");
+    if (/border-left\s*:/i.test(inline)) paragraph.classList.add("xhs-subheading", "xhs-keep-next");
+  }
+
+  for (const codeBlock of measure.querySelectorAll('[style*="background:#1E293B"]')) {
+    if (codeBlock.parentElement === measure) codeBlock.classList.add("xhs-code-block");
+  }
+
+  // 图片和紧随其后的图注组成一个媒体单元，防止图注跨页，同时统一居中。
+  for (const element of [...measure.children]) {
+    if (!element.querySelector?.("img")) continue;
+    const caption = element.nextElementSibling;
+    if (!caption?.classList.contains("xhs-caption")) continue;
+    const pair = document.createElement("div");
+    pair.className = "xhs-media-pair";
+    element.replaceWith(pair);
+    pair.append(element, caption);
+  }
+
+  for (const element of [...measure.children]) element.classList.add("xhs-html-block");
+  const direct = [...measure.children];
+  for (let index = 0; index < direct.length - 1; index++) {
+    const current = direct[index];
+    const next = direct[index + 1];
+    const endsWithLead = /[：:]\s*$/.test((current.textContent || "").trim());
+    if (endsWithLead && (next.classList.contains("xhs-list-row") || next.classList.contains("xhs-subheading"))) {
+      current.classList.add("xhs-keep-next");
     }
   }
 }, { html: contentHtml, unwrapRoot: isHtml });
@@ -390,19 +514,26 @@ const pagination = await page.evaluate(({ profile: cardProfile, avatarData }) =>
     - parseFloat(getComputedStyle(footer).marginTop) - parseFloat(getComputedStyle(body).paddingTop);
   stage.removeChild(probe);
 
-  const margin = 26;
+  const margin = 16;
   const groups = [];
   let current = { nodes: [], height: 0 };
   const flush = () => {
     if (current.nodes.length) groups.push(current);
     current = { nodes: [], height: 0 };
   };
-  for (const element of [...measure.children]) {
+  const elements = [...measure.children];
+  for (let elementIndex = 0; elementIndex < elements.length; elementIndex++) {
+    const element = elements[elementIndex];
     if (element.tagName === "HR") {
       flush();
       continue;
     }
     const height = element.offsetHeight + margin;
+    const next = elements[elementIndex + 1];
+    const nextHeight = next ? next.offsetHeight + margin : 0;
+    if (element.classList.contains("xhs-keep-next")
+      && current.nodes.length
+      && current.height + height + nextHeight > maxHeight) flush();
     if (height > maxHeight && !current.nodes.length) {
       groups.push({ nodes: [element], height, shrink: true });
       continue;
@@ -416,6 +547,31 @@ const pagination = await page.evaluate(({ profile: cardProfile, avatarData }) =>
     current.height += height;
   }
   flush();
+
+  // 相邻页做一次顺序不变的均衡：把前一页末尾的完整内容块移到后一页页首，
+  // 仅在两页高度差确实缩小时执行。避免末页只有一句话，也不切断段落或媒体。
+  const blockHeight = (node) => node.offsetHeight + margin;
+  for (let groupIndex = 0; groupIndex < groups.length - 1; groupIndex++) {
+    const previous = groups[groupIndex];
+    const following = groups[groupIndex + 1];
+    if (previous.shrink || following.shrink) continue;
+    while (previous.nodes.length > 1) {
+      let moveStart = previous.nodes.length - 1;
+      if (moveStart > 0 && previous.nodes[moveStart - 1].classList.contains("xhs-keep-next")) moveStart--;
+      const moving = previous.nodes.slice(moveStart);
+      const movingHeight = moving.reduce((sum, node) => sum + blockHeight(node), 0);
+      if (following.height + movingHeight > maxHeight) break;
+      const currentDifference = Math.abs(previous.height - following.height);
+      const movedDifference = Math.abs(
+        (previous.height - movingHeight) - (following.height + movingHeight),
+      );
+      if (movedDifference >= currentDifference) break;
+      previous.nodes.splice(moveStart, moving.length);
+      following.nodes.unshift(...moving);
+      previous.height -= movingHeight;
+      following.height += movingHeight;
+    }
+  }
 
   const summaries = [];
   groups.forEach((group, index) => {
@@ -450,8 +606,11 @@ const pagination = await page.evaluate(({ profile: cardProfile, avatarData }) =>
     stage.appendChild(card);
     summaries.push((bodyElement.textContent || "").trim().replace(/\s+/g, " ").slice(0, 48));
   });
-  return { pages: groups.length, maxHeight: Math.round(maxHeight), summaries };
+  const fillRatios = groups.map((group) => Math.round(Math.min(1, group.height / maxHeight) * 100));
+  return { pages: groups.length, maxHeight: Math.round(maxHeight), summaries, fillRatios };
 }, { profile, avatarData: avatarDataUrl });
+
+console.log(`✓ 分页 ${pagination.pages} 张，正文区 ${pagination.maxHeight}px，利用率 ${pagination.fillRatios.join(",")}`);
 
 for (const filename of readdirSync(outDir)) {
   if (/^card-\d+\.png$/.test(filename)) unlinkSync(join(outDir, filename));
@@ -487,16 +646,21 @@ const manifest = {
   sourceLabel,
   pages: pagination.pages,
   size: `${CARD_W * SCALE}x${CARD_H * SCALE}`,
+  logicalSize: `${CARD_W}x${CARD_H}`,
+  exportScale: SCALE,
+  bodyFontSize: "34px",
+  targetMaxPages: TARGET_MAX_PAGES,
   htmlFontScale: isHtml ? htmlFontScale : null,
   profile: { ...profile, avatar: profile.avatar ? "(configured)" : "(fallback)" },
   files,
   summaries: pagination.summaries,
+  fillRatios: pagination.fillRatios,
 };
 writeFileSync(join(outDir, "manifest.json"), JSON.stringify(manifest, null, 2), "utf-8");
 
 const description = isHtml
-  ? `由公众号排版 HTML 渲染，正文内联字号按 ${htmlFontScale} 倍适配卡片阅读，保留原主题层级与内容块；点击任意卡片可打开原图。`
-  : "由原始 Markdown 直接渲染。字号更大、内容更舒展，整体更接近原生推文长图；点击任意卡片可打开原图。";
+  ? `由公众号排版 HTML 渲染，正文内联字号按 ${htmlFontScale} 倍归一到 34px 阅读基准，保留原主题层级与内容块；点击任意卡片可打开原图。`
+  : "由原始 Markdown 按固定 864×1152 逻辑画布和 34px 正文基准渲染；页数由内容自然产生，不为控制张数缩小字号。";
 writeGallery(outDir, { files, title, sourceLabel, description, previewRoot });
 
 if (previewRoot) {
@@ -505,5 +669,8 @@ if (previewRoot) {
 }
 
 console.log(`✅ 生成 ${pagination.pages} 张卡片 → ${outDir}`);
+if (pagination.pages > TARGET_MAX_PAGES) console.warn(`[warn] 共 ${pagination.pages} 张，超过内容卡片目标 ${TARGET_MAX_PAGES} 张，请检查分页利用率。`);
 if (pagination.pages > 18) console.warn(`[warn] 共 ${pagination.pages} 张，超过小红书单帖 18 张上限，请精简或拆帖。`);
-pagination.summaries.forEach((summary, index) => console.log(`  ${String(index + 1).padStart(2, "0")}: ${summary}`));
+pagination.summaries.forEach((summary, index) => console.log(
+  `  ${String(index + 1).padStart(2, "0")} [${pagination.fillRatios[index]}%]: ${summary}`,
+));

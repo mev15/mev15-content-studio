@@ -33,6 +33,8 @@ apt-get install -y fonts-noto-cjk fonts-noto-color-emoji
 
 `avatar` 留空时用昵称首字的蓝底圆形占位。命令行参数可临时覆盖，不必改文件。
 
+也可复制 `.env.example` 为 `.env`。优先级为命令行 > 进程环境变量 > `.env` > `config.json`，支持 `XHS_TWEET_CARDS_DISPLAY_NAME`、`XHS_TWEET_CARDS_HANDLE`、`XHS_TWEET_CARDS_AVATAR`、`XHS_TWEET_CARDS_VERIFIED`、`XHS_TWEET_CARDS_FOOTER_NOTE` 和 `XHS_TWEET_CARDS_HTML_FONT_SCALE`。
+
 ## 用法
 
 ```bash
@@ -51,9 +53,11 @@ node scripts/render.mjs article.md --out ./cards \
   --name 昵称 --handle "@X: xxx" --avatar avatar.png --no-verified --footer-note "文字"
 ```
 
-统一预览模式默认输出到 `<工作区>/output/preview/xhs/{文章}/{版本}/`，生成 `card-01.png`…（2160×2880）、`manifest.json`、整组画廊 `index.html`，并刷新 `<工作区>/output/preview/index.html`。画廊会自动读取同目录 `caption.txt`。
+统一预览模式默认输出到 `<工作区>/output/preview/xhs/{文章}/{版本}/`，生成 `card-01.png`…（2160×2880）、`manifest.json`、整组画廊 `index.html`，并刷新 `<工作区>/output/preview/index.html`。统一入口中的小红书区域只展示最近处理文章的最新 Markdown 版与最新 HTML 版，各来源最多一套；公众号预览不受影响。画廊会自动读取同目录 `caption.txt`。
 
-HTML 输入会保留公众号排版主题，同时把内联 px 字号默认放大 1.75 倍（16px 正文约为 28px），避免直接套用公众号字号导致卡片文字过小。可用 `--html-font-scale <倍率>` 覆盖，或在 `config.json` 修改 `htmlFontScale`。
+排版固定使用 864×1152 逻辑画布、34px 正文、1.65 行高和 42px 左右边距，再以 2.5 倍导出 2160×2880。常规长文以 15 张为内容目标，通过列表拆分、紧凑块间距和分页利用率控制页数，不缩小正文视觉大小。
+
+HTML 输入会保留颜色、强调、标题、代码与媒体，同时移除造成大块留白的公众号白色卡片外壳，把自定义列表拆成可分页条目，并统一数字序号对齐。内联 16px 正文默认归一到 34px。
 
 ## 分页规则
 
@@ -63,6 +67,7 @@ HTML 输入会保留公众号排版主题，同时把内联 px 字号默认放�
 - 文中本地图片自动内联为 data URL
 - HTML 全文只有一个顶层容器时会自动展开后分页，避免整篇缩成一张
 - 长页面逐张截图时锁定视口和滚动位置，确保每页头像、正文与页脚完整
+- 页数由内容自然产生；超过小红书单帖 18 张时拆帖，不缩小全局字号
 
 ## 改样式
 

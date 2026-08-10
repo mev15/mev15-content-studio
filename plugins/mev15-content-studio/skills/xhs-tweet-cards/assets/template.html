@@ -8,9 +8,9 @@
     --muted: #536471;        /* Twitter 次要灰 */
     --line: #eff3f4;         /* Twitter 分隔线 */
     --accent: #1d9bf0;       /* Twitter 蓝 */
-    --card-w: 1080px;
-    --card-h: 1440px;
-    --pad-x: 64px;
+    --card-w: 864px;
+    --card-h: 1152px;
+    --pad-x: 42px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { background: #e8ebee; }
@@ -34,64 +34,64 @@
   .card-header {
     display: flex;
     align-items: center;
-    gap: 22px;
-    padding: 56px var(--pad-x) 30px;
+    gap: 14px;
+    padding: 26px var(--pad-x) 16px;
     flex: none;
   }
   .avatar {
-    width: 92px; height: 92px;
+    width: 64px; height: 64px;
     border-radius: 50%;
     flex: none;
     object-fit: cover;
     background: #d8dde2;
   }
   .avatar-fallback {
-    width: 92px; height: 92px;
+    width: 64px; height: 64px;
     border-radius: 50%;
     flex: none;
     background: var(--accent);
     color: #fff;
     display: flex; align-items: center; justify-content: center;
-    font-size: 44px; font-weight: 700;
+    font-size: 31px; font-weight: 700;
   }
   .id-block { min-width: 0; }
-  .name-row { display: flex; align-items: center; gap: 10px; }
+  .name-row { display: flex; align-items: center; gap: 8px; }
   .display-name {
-    font-size: 34px; font-weight: 700; line-height: 1.25;
+    font-size: 26px; font-weight: 700; line-height: 1.2;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .badge { width: 34px; height: 34px; flex: none; fill: var(--accent); }
+  .badge { width: 24px; height: 24px; flex: none; fill: var(--accent); }
   .handle {
-    font-size: 27px; color: var(--muted); line-height: 1.35;
+    font-size: 20px; color: var(--muted); line-height: 1.3;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .more-dots { margin-left: auto; color: var(--muted); font-size: 34px; letter-spacing: 3px; flex: none; }
+  .more-dots { margin-left: auto; color: var(--muted); font-size: 24px; letter-spacing: 2px; flex: none; }
 
   /* ---------- 正文区 ---------- */
   .card-body {
     flex: 1 1 auto;
     min-height: 0;
-    padding: 6px var(--pad-x) 0;
+    padding: 2px var(--pad-x) 0;
     overflow: hidden;
   }
-  .prose > * { margin-bottom: 26px; }
+  .prose > * { margin-bottom: 16px; }
   .prose p, .prose li {
-    font-size: 30px;
-    line-height: 1.72;
+    font-size: 34px;
+    line-height: 1.65;
     overflow-wrap: break-word;
   }
-  .prose h1 { font-size: 44px; line-height: 1.4; font-weight: 700; margin-bottom: 30px; }
-  .prose h2 { font-size: 37px; line-height: 1.45; font-weight: 700; margin-top: 8px; }
-  .prose h3 { font-size: 32px; line-height: 1.5; font-weight: 700; }
+  .prose h1 { font-size: 48px; line-height: 1.28; font-weight: 700; margin-bottom: 20px; }
+  .prose h2 { font-size: 41px; line-height: 1.32; font-weight: 700; margin-top: 6px; }
+  .prose h3 { font-size: 37px; line-height: 1.38; font-weight: 700; }
   .prose strong { font-weight: 700; }
   .prose em { font-style: italic; }
   .prose a { color: var(--accent); text-decoration: none; }
-  .prose ul, .prose ol { padding-left: 44px; }
-  .prose li { margin-bottom: 12px; }
+  .prose ul, .prose ol { padding-left: 40px; }
+  .prose li { margin-bottom: 8px; }
   .prose li:last-child { margin-bottom: 0; }
   .prose blockquote {
-    border-left: 8px solid var(--line);
-    padding: 6px 0 6px 30px;
+    border-left: 6px solid var(--line);
+    padding: 5px 0 5px 24px;
     color: var(--muted);
   }
   .prose blockquote p { color: inherit; }
@@ -99,24 +99,28 @@
     font-family: "SFMono-Regular", Menlo, Consolas, "Noto Sans Mono CJK SC", monospace;
     font-size: 0.86em;
     background: #f4f6f8;
-    border-radius: 8px;
-    padding: 3px 10px;
+    border-radius: 6px;
+    padding: 3px 8px;
   }
   .prose pre {
     background: #f7f9fa;
     border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 26px 30px;
+    border-radius: 13px;
+    padding: 21px 24px;
     overflow: hidden;
   }
   .prose pre code {
     background: none; padding: 0;
-    font-size: 24px; line-height: 1.6;
+    font-size: 27px; line-height: 1.65;
     white-space: pre-wrap; overflow-wrap: break-word;
   }
   .prose img {
     max-width: 100%;
-    border-radius: 20px;
+    max-height: 440px;
+    width: auto;
+    margin: 0 auto;
+    object-fit: contain;
+    border-radius: 16px;
     border: 1px solid var(--line);
     display: block;
   }
@@ -124,15 +128,69 @@
   .prose table {
     border-collapse: collapse;
     width: 100%;
-    font-size: 26px;
+    font-size: 30px;
   }
   .prose th, .prose td {
     border: 1px solid var(--line);
-    padding: 14px 18px;
+    padding: 11px 14px;
     text-align: left;
     line-height: 1.5;
   }
   .prose th { background: #f7f9fa; font-weight: 700; }
+
+  /* ---------- 公众号 HTML 归一化 ---------- */
+  .prose .xhs-html-block { margin: 0 0 16px !important; }
+  .prose .xhs-html-body {
+    font-size: 34px !important;
+    line-height: 1.65 !important;
+  }
+  .prose .xhs-list-row {
+    display: grid !important;
+    grid-template-columns: 32px minmax(0, 1fr);
+    column-gap: 12px;
+    align-items: start !important;
+    margin: 0 0 10px !important;
+  }
+  .prose .xhs-list-row > .xhs-list-marker {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 30px !important;
+    height: 30px !important;
+    margin: 10px 0 0 !important;
+    border-radius: 50% !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    flex: none !important;
+  }
+  .prose .xhs-list-row > p { min-width: 0; margin: 0 !important; }
+  .prose .xhs-caption {
+    margin: 8px 0 0 !important;
+    color: #9ca3af !important;
+    font-size: 24px !important;
+    line-height: 1.45 !important;
+    text-align: center !important;
+  }
+  .prose .xhs-media-pair {
+    display: grid;
+    gap: 0;
+    justify-items: center;
+    width: 100%;
+  }
+  .prose .xhs-media-pair > * { max-width: 100%; margin-bottom: 0 !important; }
+  .card-body:has(> .xhs-media-pair:only-child),
+  .card-body:has(> p:only-child > img:only-child) {
+    display: flex;
+    align-items: center;
+  }
+  .card-body:has(> p:only-child > img:only-child) > p { width: 100%; }
+  .prose .xhs-subheading {
+    margin: 16px 0 12px !important;
+    font-size: 40px !important;
+    line-height: 1.32 !important;
+  }
+  .prose .xhs-section-heading { margin: 2px 0 14px !important; }
+  .prose .xhs-code-block { margin: 0 0 16px !important; }
 
   /* ---------- 页脚 ---------- */
   .card-footer {
@@ -140,11 +198,11 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 26px var(--pad-x) 0;
-    padding: 26px 0 48px;
+    margin: 14px var(--pad-x) 0;
+    padding: 14px 0 22px;
     border-top: 1px solid var(--line);
     color: var(--muted);
-    font-size: 26px;
+    font-size: 19px;
   }
   .page-no { font-variant-numeric: tabular-nums; }
 
