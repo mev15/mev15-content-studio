@@ -1,0 +1,19 @@
+name: Bug
+description: 缺陷报告，复现步骤必填
+labels: ["type/bug"]
+body:
+  - type: textarea
+    id: behavior
+    attributes:
+      label: 现象与期望
+      description: 实际发生了什么 vs 应该是什么
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 复现步骤
+      description: 命令/输入/环境，能让 agent 先写出复现测试
+      render: shell
+    validations:
+      required: true

@@ -1,0 +1,27 @@
+name: Feature
+description: 未开发的新功能/待办开发项，验收标准必填 — agent 可执行的最小单位
+labels: ["type/feature"]
+body:
+  - type: input
+    id: goal
+    attributes:
+      label: 目标
+      description: 一句话说清做什么
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 验收标准
+      description: 可验证的完成条件（测试命令、预期输出、行为断言）
+      value: |
+        - [ ]
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: 上下文
+      description: 相关文件、命令、链接、约束（可选）
+    validations:
+      required: false
