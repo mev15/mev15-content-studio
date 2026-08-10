@@ -1,0 +1,4 @@
+interface:
+  display_name: "小红书自动轮播"
+  short_description: "保留原文重点与关键图片，自动生成带Twitter壳的小红书轮播图文"
+  default_prompt: "Use $xhs-carousel 把这篇文章按原文措辞与重点标记重组为带 Twitter 壳、保留关键原图的小红书轮播；页数服从语义和可读性，同主题内容酌情合并，工具页展示官网与官方图标。"

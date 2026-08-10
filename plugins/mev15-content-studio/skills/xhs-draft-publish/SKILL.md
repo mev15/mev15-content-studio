@@ -1,6 +1,6 @@
 ---
 name: xhs-draft-publish
-description: 用短信验证码登录小红书创作服务平台，把生成好的图文卡片与文案存入草稿箱（只存草稿，不发布）。配合 xhs-tweet-cards 使用。触发词："存小红书草稿"、"上传小红书"、"发小红书草稿"、"xhs 草稿"、"小红书登录"。
+description: 用短信验证码登录小红书创作服务平台，把生成好的图文卡片与文案存入草稿箱（只存草稿，不发布）。配合 xhs-carousel 或 xhs-tweet-cards 使用。触发词："存小红书草稿"、"上传小红书"、"发小红书草稿"、"xhs 草稿"、"小红书登录"。
 ---
 
 # xhs-draft-publish：图文卡片 → 小红书草稿箱
@@ -9,7 +9,7 @@ description: 用短信验证码登录小红书创作服务平台，把生成好�
 
 ## 一、前置条件
 
-- 输入目录里有 `card-NN.png`（≤18 张）和 `caption.txt`（第 1 行标题 ≤20 字，空行后为正文 ≤1000 字）——即 `xhs-tweet-cards` skill 的输出目录
+- 输入目录里有 `card-NN.png`（≤18 张）和 `caption.txt`（第 1 行标题 ≤20 字，空行后为正文 ≤1000 字）——即 `xhs-carousel` 或 `xhs-tweet-cards` 的输出目录
 - 登录态默认存于 `~/.config/xhs-draft-publish/storage-state.json`（目录权限 700、文件权限 600）；设置了 `XDG_CONFIG_HOME` 时随其变化，也可用 `XHS_STATE_DIR` 覆盖整个状态目录
 
 ## 二、鉴权：短信验证码登录（人机协作，无需看浏览器界面）

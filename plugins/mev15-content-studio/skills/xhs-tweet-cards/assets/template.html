@@ -84,6 +84,13 @@
   .prose h2 { font-size: 41px; line-height: 1.32; font-weight: 700; margin-top: 6px; }
   .prose h3 { font-size: 37px; line-height: 1.38; font-weight: 700; }
   .prose strong { font-weight: 700; }
+  .prose mark {
+    padding: 0 .12em;
+    color: inherit;
+    background: linear-gradient(transparent 38%, #ffe27a 38%, #ffe27a 90%, transparent 90%);
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
   .prose em { font-style: italic; }
   .prose a { color: var(--accent); text-decoration: none; }
   .prose ul, .prose ol { padding-left: 40px; }

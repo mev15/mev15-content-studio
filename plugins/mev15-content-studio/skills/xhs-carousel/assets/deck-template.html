@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{PAGE_TITLE}}</title>
+  <style>
+    /* Derived from the Swiss grid and type principles of guizang-social-card-skill (AGPL-3.0). */
+    :root {
+      --paper: #ffffff;
+      --ink: #0f1419;
+      --muted: #536471;
+      --line: #eff3f4;
+      --soft: #f7f9f9;
+      --accent: #1d9bf0;
+      --accent-dark: #1677b8;
+      --white: #ffffff;
+      --sans: "Noto Sans CJK SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { padding: 56px; color: var(--ink); background: #17191c; font-family: var(--sans); }
+    .sheet { display: flex; flex-direction: column; align-items: center; gap: 44px; }
+    .poster {
+      position: relative;
+      width: 1080px;
+      height: 1440px;
+      overflow: hidden;
+      color: var(--ink);
+      background: var(--paper);
+      isolation: isolate;
+    }
+    .poster::before {
+      display: none;
+    }
+    .poster::after {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 8px;
+      height: 100%;
+      z-index: 0;
+      background: var(--accent);
+      content: "";
+    }
+    .page {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      padding: 34px 66px 36px;
+    }
+    .tweet-header { display: flex; align-items: center; gap: 16px; min-height: 68px; }
+    .avatar, .avatar-fallback { width: 64px; height: 64px; flex: 0 0 auto; border-radius: 50%; object-fit: cover; background: var(--accent); }
+    .avatar-fallback { display: grid; color: #fff; font-size: 29px; font-weight: 700; place-items: center; }
+    .identity-copy { min-width: 0; }
+    .name-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .display-name { max-width: 610px; overflow: hidden; margin: 0; font-size: 29px; font-weight: 700; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+    .verified-badge { width: 27px; height: 27px; flex: 0 0 auto; fill: var(--accent); }
+    .handle { max-width: 610px; overflow: hidden; margin: 5px 0 0; color: var(--muted); font-size: 23px; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+    .more-dots { margin-left: auto; color: var(--muted); font-size: 30px; font-weight: 700; letter-spacing: 3px; line-height: 1; }
+    .topline { display: flex; align-items: center; justify-content: space-between; gap: 30px; min-height: 38px; margin-top: 24px; padding: 18px 0; border-top: 1.5px solid var(--line); border-bottom: 1.5px solid var(--line); }
+    .eyebrow, .page-count {
+      margin: 0;
+      color: var(--accent-dark);
+      font-family: var(--mono);
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.25;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+    .page-count { color: var(--muted); letter-spacing: .05em; }
+    .page-body { display: flex; flex: 1; min-height: 0; flex-direction: column; padding: 36px 0 26px; }
+    .footer { display: flex; min-height: 38px; align-items: center; justify-content: space-between; gap: 28px; padding-top: 14px; color: var(--muted); border-top: 1.5px solid var(--line); font-size: 19px; }
+    .footer-note { max-width: 650px; overflow: hidden; margin: 0; text-overflow: ellipsis; white-space: nowrap; }
+    .footer-handle { margin: 0; font-variant-numeric: tabular-nums; }
+
+    h1, h2, h3, p { margin-top: 0; }
+    strong { color: var(--ink); font-weight: 800; }
+    mark {
+      padding: 0 .12em;
+      color: inherit;
+      background: linear-gradient(transparent 38%, #ffe27a 38%, #ffe27a 90%, transparent 90%);
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+    }
+    .page-title { max-width: 890px; margin-bottom: 34px; font-size: 76px; font-weight: 500; line-height: 1.12; letter-spacing: -.035em; }
+    .intro { max-width: 870px; margin-bottom: 36px; color: #343a40; font-size: 40px; font-weight: 400; line-height: 1.5; }
+
+    /* Cover — one promise, strong type, useful tags. */
+    .cover-body { justify-content: space-between; padding-top: 54px; }
+    .cover-mark { color: var(--accent); font-family: var(--mono); font-size: 154px; font-weight: 300; line-height: .88; letter-spacing: -.08em; }
+    .cover-copy { max-width: 920px; }
+    .cover-title { margin-bottom: 34px; font-size: 104px; font-weight: 300; line-height: 1.08; letter-spacing: -.05em; }
+    .cover-subtitle { max-width: 850px; margin-bottom: 0; color: #30363c; font-size: 43px; line-height: 1.5; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 14px; padding-top: 42px; border-top: 2px solid var(--ink); }
+    .tag { padding: 13px 20px 12px; color: var(--accent-dark); border: 1.5px solid var(--accent); font-size: 25px; font-weight: 700; line-height: 1; }
+
+    /* Statement — one claim with a large visual anchor. */
+    .statement-body { justify-content: space-between; }
+    .statement-title { margin: 0; font-size: 104px; font-weight: 300; line-height: 1.12; letter-spacing: -.045em; }
+    .statement-accent { margin: 24px 0; color: var(--accent); font-family: var(--mono); font-size: 134px; font-weight: 300; line-height: .95; letter-spacing: -.06em; }
+    .statement-copy { max-width: 870px; margin: 0; padding: 28px 32px; color: var(--white); background: var(--ink); font-size: 41px; line-height: 1.5; }
+
+    /* List / summary — full-height ledger rows. */
+    .ledger { display: flex; flex: 1; min-height: 0; flex-direction: column; border-top: 2px solid var(--ink); }
+    .ledger-row { display: grid; flex: 1; min-height: 118px; grid-template-columns: 72px minmax(0, 1fr); align-items: center; gap: 22px; padding: 22px 4px; border-bottom: 1.5px solid var(--line); }
+    .ledger-no { align-self: start; padding-top: 4px; color: var(--accent); font-family: var(--mono); font-size: 34px; font-weight: 700; line-height: 1.2; }
+    .ledger-heading { display: flex; min-width: 0; align-items: center; gap: 16px; }
+    .ledger-icon { display: block; width: 58px; height: 58px; flex: 0 0 auto; border: 1.5px solid var(--line); border-radius: 14px; object-fit: contain; background: var(--ink); }
+    .ledger-title { margin: 0; font-size: 40px; font-weight: 700; line-height: 1.35; }
+    .ledger-text { margin: 8px 0 0; color: #3f474f; font-size: 32px; line-height: 1.48; }
+    .ledger-copy.has-icon .ledger-text { margin-left: 74px; }
+    .closing { margin: 30px 0 0; padding-left: 24px; color: var(--accent-dark); border-left: 7px solid var(--accent); font-size: 37px; font-weight: 700; line-height: 1.5; }
+
+    /* Steps — dominant number plus compact explanation. */
+    .steps { display: grid; flex: 1; min-height: 0; grid-auto-rows: 1fr; gap: 16px; }
+    .step { display: grid; min-height: 0; grid-template-columns: 122px minmax(0, 1fr); align-items: center; gap: 26px; padding: 22px 28px; border: 1.5px solid var(--line); background: rgba(255,255,255,.62); }
+    .step-no { color: var(--accent); font-family: var(--mono); font-size: 66px; font-weight: 300; line-height: 1; }
+    .step-title { margin: 0; font-size: 39px; font-weight: 700; line-height: 1.3; }
+    .step-text { margin: 8px 0 0; color: #46505a; font-size: 31px; line-height: 1.45; }
+
+    /* Compare — two large columns, no nested cards. */
+    .compare-grid { display: grid; flex: 1; min-height: 0; grid-template-columns: 1fr 1fr; gap: 26px; }
+    .compare-side { display: flex; min-height: 0; flex-direction: column; padding: 30px; border-top: 9px solid var(--accent); background: rgba(255,255,255,.66); }
+    .compare-side:last-child { color: var(--white); border-top-color: var(--ink); background: var(--ink); }
+    .compare-title { margin: 0 0 28px; font-size: 43px; font-weight: 700; line-height: 1.25; }
+    .compare-list { display: flex; flex: 1; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+    .compare-list li { display: flex; flex: 1; align-items: center; padding: 20px 0; border-top: 1px solid var(--line); font-size: 33px; line-height: 1.45; }
+    .compare-side:last-child .compare-list li { border-color: #49505a; }
+
+    /* Quote — assertion page, not a fake external citation. */
+    .quote-body { justify-content: center; }
+    .quote-mark { height: 120px; color: var(--accent); font-family: Georgia, serif; font-size: 188px; line-height: 1; }
+    .quote-copy { max-width: 910px; margin: 20px 0 0; font-size: 76px; font-weight: 400; line-height: 1.28; letter-spacing: -.035em; }
+    .quote-note { max-width: 830px; margin: 48px 0 0; padding-top: 30px; color: #46505a; border-top: 2px solid var(--ink); font-size: 35px; line-height: 1.55; }
+
+    /* Evidence image — one readable artifact. */
+    .image-body { justify-content: flex-start; gap: 22px; }
+    .image-body .page-title, .image-body .intro { margin-bottom: 0; }
+    .image-frame { display: flex; flex: 0 0 auto; min-height: 0; max-height: 700px; overflow: hidden; align-items: center; justify-content: center; border: 1.5px solid var(--line); background: var(--soft); }
+    .image-frame img { display: block; width: auto; max-width: 100%; height: auto; max-height: 700px; object-fit: contain; }
+    .image-caption { margin: 0; color: var(--muted); font-size: 28px; line-height: 1.45; text-align: center; }
+    .image-note { margin: 0; padding-left: 22px; color: #34414d; border-left: 6px solid var(--accent); font-size: 32px; line-height: 1.5; }
+    .image-list { display: grid; gap: 0; border-top: 1.5px solid var(--line); }
+    .image-list-row { display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 16px; align-items: start; padding: 16px 0; border-bottom: 1.5px solid var(--line); }
+    .image-list-no { color: var(--accent); font-family: var(--mono); font-size: 28px; font-weight: 700; line-height: 1.4; }
+    .image-list-text { margin: 0; color: #34414d; font-size: 29px; line-height: 1.45; }
+
+    /* Tool — one repeatable product header plus the original explanatory screenshot. */
+    .tool-body { justify-content: flex-start; gap: 20px; }
+    .tool-heading { display: grid; grid-template-columns: 96px minmax(0, 1fr); align-items: center; gap: 24px; padding-bottom: 22px; border-bottom: 2px solid var(--ink); }
+    .tool-icon { display: block; width: 96px; height: 96px; border: 1.5px solid var(--line); border-radius: 22px; object-fit: contain; background: var(--ink); }
+    .tool-icon-fallback { display: grid; color: var(--white); font-family: var(--mono); font-size: 50px; font-weight: 700; place-items: center; }
+    .tool-identity { min-width: 0; }
+    .tool-label { margin: 0 0 4px; color: var(--accent-dark); font-family: var(--mono); font-size: 28px; font-weight: 800; letter-spacing: .12em; }
+    .tool-name { margin: 0; font-size: 65px; font-weight: 700; line-height: 1; letter-spacing: -.04em; }
+    .tool-url { margin: 8px 0 0; color: #27323d; font-family: var(--mono); font-size: 29px; font-weight: 700; line-height: 1.25; }
+    .tool-title { margin: 0; font-size: 43px; font-weight: 700; line-height: 1.34; }
+    .tool-frame { display: flex; flex: 0 1 auto; min-height: 0; max-height: 610px; overflow: hidden; align-items: center; justify-content: center; border: 1.5px solid var(--line); background: var(--soft); }
+    .tool-frame img { display: block; width: auto; max-width: 100%; height: auto; max-height: 610px; object-fit: contain; }
+    .tool-note { margin: 0; padding-left: 22px; color: #34414d; border-left: 6px solid var(--accent); font-size: 31px; line-height: 1.45; }
+
+    @media print { body { padding: 0; background: #fff; } .sheet { gap: 0; } }
+  </style>
+</head>
+<body>
+  <main class="sheet">
+{{POSTERS}}
+  </main>
+</body>
+</html>

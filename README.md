@@ -25,13 +25,17 @@
 
 把文章 **markdown 原稿**转换并发布到 X (Twitter) Articles **草稿箱**：自动做 md → content_state（DraftJS）结构转换，代码块转 blockquote、表格改写为列表、正文图片与封面上传为 X 媒体，最后调官方 `POST /2/articles/draft` 创建草稿。直连 X 官方 API（OAuth 2.0 PKCE；发布账号需 X Premium，开发者 App 按量计费），零 npm 依赖（Node ≥ 22.6）。只写草稿箱，不正式发布。凭据配置：按 skill 内 `env.example` 模板复制到 `~/.config/x-publish/env` 后运行一次 `--login`（本仓库不存放任何凭据）。
 
-### `xhs-tweet-cards`
+### `xhs-carousel`
 
-把 Markdown / HTML 文章渲染成带 Twitter 壳（圆头像 + 昵称 + 蓝V + `@handle` + 页码）的小红书 3:4 图文卡片（2160×2880 PNG），并生成整组 HTML 画廊与小红书发帖文案（标题 ≤20 字 + 正文 ≤1000 字 + 话题标签）。产物默认写入 `output/preview/xhs/{文章}/{版本}/`，自动登记到与 gzh-design 共用的 `output/preview/index.html`。**原文保真**：内容只经 marked 确定性转换与 DOM 分页，不经 LLM 改写；HTML 内联字号会按卡片规格默认放大 1.75 倍，避免公众号 16px 正文在长图中过小。Playwright 本地渲染，需 `npm install`、chromium 与 Noto CJK 字体（见 skill 内 README）。
+把 Markdown / HTML / 长文全自动重组为带 Twitter 账号壳的青十五品牌小红书 3:4 轮播图文（1080×1440 PNG）。它不会直接截图原文，而是尽量沿用原文措辞，通过删减、合并生成通常 5–10 页、最多 15 页的语义故事板，优先保留原文中有助理解的图片，再自动选择观点、清单、步骤、对比、引用、证据图、工具和总结等稳定版式；自动生成发帖文案，检查溢出、字号与留白，并登记到 `output/preview/index.html`。默认不询问分页、模板或配色，最多通过提示词调整重点、语气、页数和图片范围。
+
+### `xhs-tweet-cards`（原文保真模式）
+
+把 Markdown / HTML 文章渲染成带 Twitter 壳（圆头像 + 昵称 + 蓝V + `@handle` + 页码）的小红书 3:4 图文卡片（2160×2880 PNG），并生成整组 HTML 画廊与小红书发帖文案（标题 ≤20 字 + 正文 ≤1000 字 + 话题标签）。产物默认写入 `output/preview/xhs/{文章}/{版本}/`，自动登记到与 gzh-design 共用的 `output/preview/index.html`。**原文保真**：内容只经 marked 确定性转换与 DOM 分页，不经 LLM 改写；保留粗体与高亮，HTML 内联字号会按卡片规格默认放大 2.125 倍，避免公众号 16px 正文在长图中过小。Playwright 本地渲染，需 `npm install`、chromium 与 Noto CJK 字体（见 skill 内 README）。
 
 ### `xhs-draft-publish`
 
-把 `xhs-tweet-cards` 的产物（卡片 + 文案）存入小红书创作服务平台**草稿箱**：短信验证码登录（验证码经 `.state/code.txt` 交接，无需浏览器界面；登录态本地 0600 保存），自动上传图片、填标题正文、点"存草稿"，每步截图落盘。只写草稿箱，不发布——脚本中不存在点击发布按钮的代码路径。与 `gzh-publish` / `x-publish` 不同：小红书没有面向个人创作者的官方内容 API，此 skill 走浏览器自动化，属平台条款灰区，使用前请阅读 skill 内风控须知（建议先用测试号、保持人类量级节奏）。
+把 `xhs-carousel` 或 `xhs-tweet-cards` 的产物（卡片 + 文案）存入小红书创作服务平台**草稿箱**：短信验证码登录（验证码默认经 `~/.config/xhs-draft-publish/code.txt` 交接，无需浏览器界面；登录态同目录以 0600 保存），自动上传图片、填标题正文、点"存草稿"，每步截图落盘。只写草稿箱，不发布——脚本中不存在点击发布按钮的代码路径。与 `gzh-publish` / `x-publish` 不同：小红书没有面向个人创作者的官方内容 API，此 skill 走浏览器自动化，属平台条款灰区，使用前请阅读 skill 内风控须知（建议先用测试号、保持人类量级节奏）。
 
 ## 安装
 
@@ -56,6 +60,7 @@ cp -R plugins/mev15-content-studio/skills/gzh-design "${CODEX_HOME:-$HOME/.codex
 cp -R plugins/mev15-content-studio/skills/qing-shiwu-illustrations "${CODEX_HOME:-$HOME/.codex}/skills/"
 cp -R plugins/mev15-content-studio/skills/gzh-publish "${CODEX_HOME:-$HOME/.codex}/skills/"
 cp -R plugins/mev15-content-studio/skills/x-publish "${CODEX_HOME:-$HOME/.codex}/skills/"
+cp -R plugins/mev15-content-studio/skills/xhs-carousel "${CODEX_HOME:-$HOME/.codex}/skills/"
 cp -R plugins/mev15-content-studio/skills/xhs-tweet-cards "${CODEX_HOME:-$HOME/.codex}/skills/"
 cp -R plugins/mev15-content-studio/skills/xhs-draft-publish "${CODEX_HOME:-$HOME/.codex}/skills/"
 ```
@@ -70,6 +75,7 @@ cp -R plugins/mev15-content-studio/skills/gzh-design ~/.claude/skills/
 cp -R plugins/mev15-content-studio/skills/qing-shiwu-illustrations ~/.claude/skills/
 cp -R plugins/mev15-content-studio/skills/gzh-publish ~/.claude/skills/
 cp -R plugins/mev15-content-studio/skills/x-publish ~/.claude/skills/
+cp -R plugins/mev15-content-studio/skills/xhs-carousel ~/.claude/skills/
 cp -R plugins/mev15-content-studio/skills/xhs-tweet-cards ~/.claude/skills/
 cp -R plugins/mev15-content-studio/skills/xhs-draft-publish ~/.claude/skills/
 ```
@@ -94,6 +100,10 @@ Use $gzh-publish 把 article.html 和 cover.jpg 发布到公众号草稿箱，�
 
 ```text
 Use $x-publish 把 article.md 和 x-cover.jpg 发布到 X Articles 草稿箱。
+```
+
+```text
+Use $xhs-carousel 把 article.md 自动重组为小红书轮播图文和发帖文案。
 ```
 
 ```text
@@ -123,6 +133,7 @@ codex plugin add mev15-content-studio@mev15
 
 - `gzh-design` 基于 [`isjiamu/gzh-design-skill`](https://github.com/isjiamu/gzh-design-skill)，按 GNU AGPL-3.0-or-later 发布，并保留原作者声明。
 - `qing-shiwu-illustrations` 基于 Ian Xiaohei Illustrations，保留 MIT License 与 Ian 的署名要求。
+- `xhs-carousel` 基于 [`op7418/guizang-social-card-skill`](https://github.com/op7418/guizang-social-card-skill)，按 GNU AGPL-3.0-or-later 发布并保留上游说明。
 - `gzh-publish` 与 `x-publish` 为本仓库原创组件，按仓库根许可证 GNU AGPL-3.0-or-later 发布。
 
 完整说明见 [NOTICE.md](NOTICE.md) 与 [LICENSES](LICENSES)。仓库根目录的默认许可证为 GNU AGPL-3.0-or-later；各独立组件目录中的许可证继续适用于对应组件。

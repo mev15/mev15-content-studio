@@ -1,0 +1,13 @@
+{
+  "name": "xhs-carousel-skill",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-or-later",
+  "scripts": {
+    "render": "node scripts/render.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.55.0"
+  }
+}

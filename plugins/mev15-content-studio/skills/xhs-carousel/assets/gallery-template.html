@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{PAGE_TITLE}}</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #18202a; background: #eef2f5; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
+    .page { width: min(1380px, calc(100% - 32px)); margin: 0 auto; padding: 44px 0 72px; }
+    .back { color: #3f73b9; font-size: 14px; font-weight: 700; text-decoration: none; }
+    .badge { display: inline-block; margin-top: 30px; color: #3f73b9; font-family: ui-monospace,monospace; font-size: 12px; font-weight: 800; letter-spacing: .1em; }
+    h1 { max-width: 900px; margin: 12px 0 10px; font-size: clamp(30px,5vw,52px); line-height: 1.16; }
+    .intro { margin: 0 0 32px; color: #667586; font-size: 15px; line-height: 1.7; }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 20px; align-items: start; }
+    figure { margin: 0; padding: 10px; border: 1px solid #d7e0e7; border-radius: 14px; background: #fff; box-shadow: 0 12px 34px rgba(33,49,63,.08); }
+    figure a { display: block; }
+    img { display: block; width: 100%; height: auto; border-radius: 8px; background: #f8f8f4; }
+    figcaption { padding: 10px 2px 2px; color: #788695; font-family: ui-monospace,monospace; font-size: 12px; text-align: center; }
+    .caption { margin-top: 28px; padding: 22px; border: 1px solid #d7e0e7; border-radius: 14px; background: #fff; }
+    .caption h2 { margin: 0 0 12px; font-size: 18px; }
+    .caption pre { margin: 0; overflow-wrap: anywhere; color: #41505e; font-family: inherit; font-size: 14px; line-height: 1.75; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    {{BACK_LINK}}
+    <div class="badge">{{BADGE}}</div>
+    <h1>{{ARTICLE_TITLE}}</h1>
+    <p class="intro">语义重组轮播 · 每页一个重点 · 1080×1440 PNG</p>
+    <section class="gallery">
+{{GALLERY_ITEMS}}
+    </section>
+    <section class="caption"><h2>小红书发帖文案</h2><pre>{{CAPTION}}</pre></section>
+  </main>
+</body>
+</html>

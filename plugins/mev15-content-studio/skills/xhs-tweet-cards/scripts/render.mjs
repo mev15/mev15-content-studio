@@ -121,6 +121,29 @@ function inlineLocalImages(html, baseDir) {
   });
 }
 
+const highlightExtension = {
+  name: "highlight",
+  level: "inline",
+  start(src) {
+    const index = src.indexOf("==");
+    return index >= 0 ? index : undefined;
+  },
+  tokenizer(src) {
+    const match = /^==([^=\n]+)==/.exec(src);
+    if (!match) return undefined;
+    return {
+      type: "highlight",
+      raw: match[0],
+      text: match[1],
+      tokens: this.lexer.inlineTokens(match[1]),
+    };
+  },
+  renderer(token) {
+    return `<mark>${this.parser.parseInline(token.tokens)}</mark>`;
+  },
+  childTokens: ["tokens"],
+};
+
 /** 公众号 HTML 常用 16px 正文；归一到 864px 逻辑画布上的 34px 阅读基准。 */
 function scaleHtmlFontSizes(html, factor) {
   if (factor === 1) return html;
@@ -389,6 +412,7 @@ const profile = {
 };
 
 const raw = readFileSync(input, "utf-8");
+marked.use({ extensions: [highlightExtension] });
 marked.setOptions({ gfm: true, breaks: true });
 let contentHtml = isHtml ? scaleHtmlFontSizes(raw, htmlFontScale) : marked.parse(raw);
 contentHtml = inlineLocalImages(contentHtml, dirname(input));
