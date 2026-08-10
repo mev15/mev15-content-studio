@@ -138,12 +138,29 @@ try {
   // 5. 提交
   const codeInput = page.locator('input[placeholder*="验证码"]').first();
   await codeInput.fill(code);
-  await page.locator('button:has-text("登"), text="登 录"').first().click({ timeout: 15000 });
-  await page.waitForTimeout(6000);
+  await page.getByRole("button", { name: /登\s*录/ }).click({ timeout: 15000 });
+  await page.waitForTimeout(2500);
+
+  // 某些账号/环境会在短信验证后追加 App 扫码验证。保留当前页面等待扫码，
+  // 不要提前跳转到 HOME_URL，否则会使二维码立刻失效。
+  const scanTitle = page.getByText("扫码验证", { exact: true });
+  if (await scanTitle.isVisible().catch(() => false)) {
+    const qrShot = await shot(page, "02-qr-verification");
+    console.log(`[2.5/3] 需要用已登录该账号的小红书 App 扫码验证（二维码约 1 分钟有效）: ${qrShot}`);
+    const scanDeadline = Date.now() + 2 * 60 * 1000;
+    while (Date.now() < scanDeadline && /\/login/.test(page.url())) {
+      await sleep(1500);
+    }
+    if (/\/login/.test(page.url())) {
+      throw new Error(`等待 App 扫码验证超时，请重新运行登录流程。二维码截图: ${qrShot}`);
+    }
+  }
+
+  await page.waitForTimeout(3000);
   await shot(page, "02-submitted");
 
   // 6. 校验并保存
-  const loggedIn = await isLoggedIn(page);
+  const loggedIn = /\/login/.test(page.url()) ? await isLoggedIn(page) : true;
   const finalShot = await shot(page, "03-result");
   if (!loggedIn) {
     throw new Error(`登录未成功（可能验证码错误/过期，或触发了二次验证）。请查看截图: ${finalShot}`);

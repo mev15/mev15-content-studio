@@ -336,7 +336,7 @@ const inferredId = basename(story.source || inputPath, extname(story.source || i
 const articleId = safeSegment(args["article-id"] || inferredId);
 const variant = safeSegment(args.variant || "carousel", "carousel");
 const outDir = resolve(args.out || (previewRoot
-  ? join(previewRoot, "xhs", articleId, variant)
+  ? join(previewRoot, articleId, variant)
   : join(dirname(inputPath), "xhs-carousel", articleId)));
 mkdirSync(outDir, { recursive: true });
 

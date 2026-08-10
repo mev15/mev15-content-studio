@@ -28,7 +28,7 @@ function formatTime(value) {
 function collectGzh(previewRoot) {
   const entries = [];
   for (const articleDir of directories(previewRoot)) {
-    if (["xhs"].includes(basename(articleDir)) || basename(articleDir).startsWith(".")) continue;
+    if (basename(articleDir).startsWith(".") || basename(articleDir).startsWith("_")) continue;
     const htmlFiles = readdirSync(articleDir).filter((name) => name.endsWith(".html") && name !== "index.html").map((name) => join(articleDir, name));
     const primary = htmlFiles.filter((file) => file.endsWith("_预览.html")).sort((a, b) => mtime(b) - mtime(a))[0]
       || htmlFiles.sort((a, b) => mtime(b) - mtime(a))[0];
@@ -48,8 +48,8 @@ function collectGzh(previewRoot) {
 
 function collectXhs(previewRoot) {
   const entries = [];
-  const root = join(previewRoot, "xhs");
-  for (const articleDir of directories(root)) {
+  for (const articleDir of directories(previewRoot)) {
+    if (basename(articleDir).startsWith(".") || basename(articleDir).startsWith("_")) continue;
     for (const variantDir of directories(articleDir)) {
       const manifestPath = join(variantDir, "manifest.json");
       const galleryPath = join(variantDir, "index.html");

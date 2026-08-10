@@ -2,7 +2,7 @@
 /**
  * xhs-tweet-cards 渲染器
  * 输入 Markdown / HTML，输出带推文壳的小红书 3:4 多图（2160×2880 PNG）。
- * 可选把画廊写入 output/preview/xhs/... 并刷新统一预览入口。
+ * 可选把画廊写入 output/preview/<文章>/<版本>/ 并刷新统一预览入口。
  */
 import { chromium } from "playwright";
 import { marked } from "marked";
@@ -184,7 +184,7 @@ function collectGzhEntries(previewRoot) {
   const entries = [];
   for (const articleDir of listDirectories(previewRoot)) {
     const articleName = basename(articleDir);
-    if (articleName === "xhs" || articleName.startsWith("_") || articleName.startsWith(".")) continue;
+    if (articleName.startsWith("_") || articleName.startsWith(".")) continue;
     const files = readdirSync(articleDir)
       .filter((name) => name.endsWith(".html") && name !== "index.html")
       .map((name) => join(articleDir, name));
@@ -211,8 +211,9 @@ function collectGzhEntries(previewRoot) {
 
 function collectXhsEntries(previewRoot) {
   const entries = [];
-  const xhsRoot = join(previewRoot, "xhs");
-  for (const articleDir of listDirectories(xhsRoot)) {
+  for (const articleDir of listDirectories(previewRoot)) {
+    const articleName = basename(articleDir);
+    if (articleName.startsWith("_") || articleName.startsWith(".")) continue;
     for (const variantDir of listDirectories(articleDir)) {
       const manifestPath = join(variantDir, "manifest.json");
       const galleryPath = join(variantDir, "index.html");
@@ -392,7 +393,7 @@ const inferredArticleId = basename(input, extname(input)).replace(/_排版_.+$/,
 const articleId = safeSegment(args["article-id"] || inferredArticleId, "untitled");
 const variant = safeSegment(args.variant || (isHtml ? "html" : "markdown"), isHtml ? "html" : "markdown");
 const outDir = resolve(args.out || (previewRoot
-  ? join(previewRoot, "xhs", articleId, variant)
+  ? join(previewRoot, articleId, variant)
   : join(dirname(input), "xhs-cards")));
 const title = args.title || articleId;
 const sourceLabel = args["source-label"] || (isHtml ? "公众号 HTML" : "原始 Markdown");

@@ -39,8 +39,7 @@ def collect_articles(preview_root):
     """只收集文章子目录；以下划线或点开头的内部目录会被忽略。"""
     articles = []
     for article_dir in preview_root.iterdir():
-        if (not article_dir.is_dir() or article_dir.name == "xhs" or
-                article_dir.name.startswith(("_", "."))):
+        if not article_dir.is_dir() or article_dir.name.startswith(("_", ".")):
             continue
 
         preview_files = sorted(
@@ -79,13 +78,9 @@ def collect_articles(preview_root):
 
 
 def collect_xhs_previews(preview_root):
-    """收集 output/preview/xhs/{文章}/{版本}/ 下的多图画廊。"""
+    """收集 output/preview/{文章}/{版本}/ 下的多图画廊。"""
     previews = []
-    xhs_root = preview_root / "xhs"
-    if not xhs_root.is_dir():
-        return previews
-
-    for article_dir in xhs_root.iterdir():
+    for article_dir in preview_root.iterdir():
         if not article_dir.is_dir() or article_dir.name.startswith(("_", ".")):
             continue
         for variant_dir in article_dir.iterdir():

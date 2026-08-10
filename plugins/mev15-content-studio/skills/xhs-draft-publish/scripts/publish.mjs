@@ -12,7 +12,7 @@
  *   - 页面结构变化时明确报错并留证据，不做静默兜底
  */
 import { chromium } from "playwright";
-import { readFileSync, readdirSync, existsSync, mkdirSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync, mkdirSync, chmodSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { homedir } from "node:os";
 
@@ -109,15 +109,28 @@ try {
   await shot(page, "publish-page");
 
   // 1. 切到"上传图文"标签（发布页默认可能是视频）
-  const imageTab = page.locator('text=/上传图文|写长文|图文/').first();
-  if (await imageTab.count()) {
-    await imageTab.click({ timeout: 10000 }).catch(() => {});
-    await page.waitForTimeout(2500);
+  const imageTabs = page.getByText("上传图文", { exact: true });
+  const viewport = page.viewportSize() || { width: 1440, height: 900 };
+  let imageTabClicked = false;
+  for (let i = 0; i < await imageTabs.count(); i += 1) {
+    const candidate = imageTabs.nth(i);
+    const box = await candidate.boundingBox();
+    if (!box || box.x < 0 || box.y < 0 || box.x >= viewport.width || box.y >= viewport.height) continue;
+    try {
+      await candidate.click({ timeout: 2500 });
+      imageTabClicked = true;
+      break;
+    } catch {}
   }
+  if (!imageTabClicked) throw new Error('找不到视口内可点击的“上传图文”标签，已中止。');
+  await page.waitForTimeout(2500);
 
   // 2. 上传图片（直接投喂 file input，不依赖点击弹系统文件框）
-  const fileInput = page.locator('input[type="file"]').first();
+  const fileInput = page.locator('input[type="file"][accept*=".png"]').first();
   await fileInput.waitFor({ state: "attached", timeout: 20000 });
+  if (await fileInput.getAttribute("multiple") === null) {
+    throw new Error('“上传图文”未切换成功：当前图片 input 不支持多选，已中止。');
+  }
   await fileInput.setInputFiles(images);
   console.log(`[1/4] 已提交 ${images.length} 张图片，等待上传完成…`);
   await page.waitForTimeout(3000 + images.length * 1500);
@@ -143,23 +156,74 @@ try {
   await page.waitForTimeout(1500);
   const filledShot = await shot(page, "content-filled");
 
+  // 4. 发布控件是关闭的 Shadow DOM。通过 CDP 穿透读取内部节点，并且只接受：
+  //    - 外层明确声明 is-save-draft=true、save-text=“存草稿/暂存离开”
+  //    - 内层 class 含 white 且文字严格匹配“存草稿/暂存离开”的 BUTTON
+  const cdp = await ctx.newCDPSession(page);
+  await cdp.send("DOM.enable");
+  const { root: cdpRoot } = await cdp.send("DOM.getDocument", { depth: -1, pierce: true });
+  const draftCandidates = [];
+
+  function attrsOf(node) {
+    const attrs = {};
+    for (let i = 0; i < (node.attributes || []).length; i += 2) {
+      attrs[node.attributes[i]] = node.attributes[i + 1];
+    }
+    return attrs;
+  }
+
+  function textOf(node) {
+    if (node.nodeName === "#text") return String(node.nodeValue || "");
+    return [...(node.children || []), ...(node.shadowRoots || [])].map(textOf).join("");
+  }
+
+  function collectDraftButtons(node, insideDraftHost = false) {
+    const attrs = attrsOf(node);
+    const isDraftHost = node.nodeName === "XHS-PUBLISH-BTN"
+      && attrs["is-save-draft"] === "true"
+      && /^(存草稿|暂存离开)$/.test(attrs["save-text"] || "")
+      && attrs["save-disabled"] !== "true";
+    const inAllowedHost = insideDraftHost || isDraftHost;
+    const name = textOf(node).trim();
+    if (inAllowedHost
+      && node.nodeName === "BUTTON"
+      && /(^|\s)white(\s|$)/.test(attrs.class || "")
+      && /^(存草稿|暂存离开)$/.test(name)) {
+      draftCandidates.push({ nodeId: node.nodeId, name, className: attrs.class || "" });
+    }
+    for (const child of node.children || []) collectDraftButtons(child, inAllowedHost);
+    for (const shadow of node.shadowRoots || []) collectDraftButtons(shadow, inAllowedHost);
+  }
+  collectDraftButtons(cdpRoot);
+
   if (args.dryRun) {
-    console.log(`[dry-run] 内容已填好但未保存。请查看截图确认: ${filledShot}`);
+    const names = draftCandidates.map(({ name, className }) => `${name}/${className}`).join("、");
+    console.log(`[dry-run] 内容已填好但未保存；封闭 Shadow DOM 内草稿候选 ${draftCandidates.length} 个${names ? `（${names}）` : ""}。请查看截图确认: ${filledShot}`);
+    await cdp.detach().catch(() => {});
     await browser.close();
     process.exit(0);
   }
 
-  // 4. 存草稿 —— 只找"存草稿/暂存"，绝不点"发布"
-  const draftBtn = page.locator('button:has-text("存草稿"), button:has-text("暂存离开"), text="存草稿"').first();
-  if (!(await draftBtn.count())) {
+  if (draftCandidates.length !== 1) {
     const p = await shot(page, "no-draft-button");
-    throw new Error(`页面上找不到"存草稿"按钮，已中止（不会改用发布按钮）。请查看截图人工确认: ${p}`);
+    throw new Error(`草稿按钮候选应为 1 个，实际为 ${draftCandidates.length} 个，已中止（不会改用发布按钮）。请查看截图: ${p}`);
   }
-  await draftBtn.click({ timeout: 15000 });
+  const [{ nodeId: draftNodeId, name: clickedDraftName }] = draftCandidates;
+  const { object: draftObject } = await cdp.send("DOM.resolveNode", { nodeId: draftNodeId });
+  await cdp.send("Runtime.callFunctionOn", {
+    objectId: draftObject.objectId,
+    functionDeclaration: "function () { this.click(); }",
+    userGesture: true,
+  });
   await page.waitForTimeout(5000);
+  // 小红书网页端草稿保存在当前浏览器本地；必须把 IndexedDB 一并写回，
+  // 否则关闭本次临时浏览器上下文后草稿会消失。
+  await ctx.storageState({ path: STATE_FILE, indexedDB: true });
+  chmodSync(STATE_FILE, 0o600);
   const doneShot = await shot(page, "draft-saved");
-  console.log(`[3/4] 已点击"存草稿"`);
-  console.log(`[4/4] ✅ 完成。请在小红书 App「草稿箱」或创作后台确认，截图: ${doneShot}`);
+  await cdp.detach().catch(() => {});
+  console.log(`[3/4] 已点击“${clickedDraftName}”`);
+  console.log(`[4/4] ✅ 完成。网页端本地草稿已持久化，请用同一 skill 配置在创作后台复查，截图: ${doneShot}`);
 } catch (e) {
   await shot(page, "error");
   console.error(`❌ 存草稿失败: ${e.message.split("\n")[0]}\n   截图目录: ${shotDir}`);

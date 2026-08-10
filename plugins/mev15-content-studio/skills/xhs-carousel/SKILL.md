@@ -53,6 +53,8 @@ node <skill>/scripts/render.mjs <storyboard.json> \
   --variant carousel
 ```
 
+统一预览模式固定输出到 `<workspace>/output/preview/<文章标识>/carousel/`。`preview/` 下每篇文章只有一个顶层目录，公众号 HTML 与小红书各版本都收在该文章目录内；不得再创建 `output/xhs-preview/` 或 `output/preview/xhs/`。
+
 独立输出可用：
 
 ```bash
@@ -95,7 +97,7 @@ XHS_CAROUSEL_FOOTER_NOTE=
 - `caption.txt`：可粘贴的小红书文案。
 - `manifest.json`、`validation.json`。
 
-使用 `--preview-root` 时自动登记到 `<workspace>/output/preview/index.html`；统一入口只展示最近处理文章的最新 carousel，不堆叠历史测试变体。汇报统一入口、卡片张数和主题结构；图片就绪后可交给 `xhs-draft-publish` 存入草稿箱。
+使用 `--preview-root` 时自动登记到 `<workspace>/output/preview/index.html`；统一入口只展示最近处理文章的最新 carousel，不堆叠历史测试变体。每次重渲染同一 `carousel` 目录时覆盖上一版成品，不另建“latest”“优化版”等测试目录。汇报统一入口、卡片张数和主题结构；图片就绪后可交给 `xhs-draft-publish` 存入草稿箱。
 
 ## 边界
 

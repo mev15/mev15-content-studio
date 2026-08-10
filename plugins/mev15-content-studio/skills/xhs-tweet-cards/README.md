@@ -53,7 +53,7 @@ node scripts/render.mjs article.md --out ./cards \
   --name 昵称 --handle "@X: xxx" --avatar avatar.png --no-verified --footer-note "文字"
 ```
 
-统一预览模式默认输出到 `<工作区>/output/preview/xhs/{文章}/{版本}/`，生成 `card-01.png`…（2160×2880）、`manifest.json`、整组画廊 `index.html`，并刷新 `<工作区>/output/preview/index.html`。统一入口中的小红书区域只展示最近处理文章的最新 Markdown 版与最新 HTML 版，各来源最多一套；公众号预览不受影响。画廊会自动读取同目录 `caption.txt`。
+统一预览模式默认输出到 `<工作区>/output/preview/{文章}/{版本}/`，生成 `card-01.png`…（2160×2880）、`manifest.json`、整组画廊 `index.html`，并刷新 `<工作区>/output/preview/index.html`。`preview/` 下每篇文章只有一个顶层目录，公众号与小红书产物共用该文章目录；不再创建 `output/xhs-preview/` 或 `output/preview/xhs/`。统一入口中的小红书区域只展示最近处理文章的最新 Markdown 版与最新 HTML 版，各来源最多一套；公众号预览不受影响。画廊会自动读取同目录 `caption.txt`。
 
 排版固定使用 864×1152 逻辑画布、34px 正文、1.65 行高和 42px 左右边距，再以 2.5 倍导出 2160×2880。常规长文以 15 张为内容目标，通过列表拆分、紧凑块间距和分页利用率控制页数，不缩小正文视觉大小。
 

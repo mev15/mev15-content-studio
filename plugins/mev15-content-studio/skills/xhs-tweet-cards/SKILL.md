@@ -39,12 +39,12 @@ XHS_TWEET_CARDS_HTML_FONT_SCALE=2.125
 `<WORKSPACE_ROOT>` 指当前文章项目或 Git 仓库根目录，不是 skill 安装目录。默认把产物写到：
 
 ```text
-<WORKSPACE_ROOT>/output/preview/xhs/{文章标识}/{版本}/
+<WORKSPACE_ROOT>/output/preview/{文章标识}/{版本}/
 ```
 
 - `{文章标识}` 默认取原稿文件名的稳定短名称；同一篇 Markdown 与 HTML 必须使用同一个标识。
 - `{版本}` 使用 `markdown`、`html` 或其他能明确区分来源的短名称。
-- 不再把面向用户的预览默认写到 `output/xhs-preview/`；只有用户明确指定 `--out` 时才走独立目录模式。
+- `preview/` 下每篇文章只有一个顶层目录；公众号 HTML 与小红书各版本都收在该文章目录内。不得创建 `output/xhs-preview/` 或 `output/preview/xhs/`；只有用户明确指定 `--out` 时才走独立目录模式。
 - 统一入口中的小红书区域只展示最近处理文章的最新 Markdown 版与最新 HTML 版，各来源最多一套；公众号预览不受影响。旧测试变体不会继续堆在入口中。
 
 ### 3. 渲染
