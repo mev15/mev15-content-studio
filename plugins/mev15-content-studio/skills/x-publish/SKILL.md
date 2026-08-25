@@ -19,8 +19,8 @@ description: 把 markdown 原稿一键转换并发布到 X (Twitter) Articles �
 | markdown | X Articles | 说明 |
 |---|---|---|
 | 第一个 `#` H1 | 文章标题 | 从正文抽出；`--title` 可覆盖 |
-| `#` / `##` / `###` | header-one/two/three | 正文中再出现的 H1 保留为 header-one |
-| `####` 及更深 | 整段粗体 | X 无 H4-H6 |
+| `#` / `##` | header-one/two | 正文中再出现的 H1 保留为 header-one |
+| `###` 及更深 | 普通段落 + 整段粗体 | X API 的 header-three 实测会触发 503；降级时保留链接、斜体等行内语义 |
 | 粗体/斜体/删除线 | inline_style_ranges | 一一对应 |
 | `==高亮==` | 粗体 | X API 没有背景高亮样式；去掉 `==` 并以粗体保留强调语义 |
 | `[文本](url)` | link entity | 一一对应 |
@@ -126,3 +126,4 @@ cp -r <本目录> ~/.codex/skills/x-publish     # 或 ln -s
 - **只写草稿箱**：脚本没有任何 `articles/{id}/publish` 调用；草稿在 x.com 桌面网页版的发帖框 → Articles 里查看、编辑、删除；重复运行创建新草稿而非覆盖。
 - OAuth token 等同账号发文权限：`tokens.json` 与 `env` 均 0600 存放于本机，不要提交仓库。scopes 最小化为 `tweet.read tweet.write users.read media.write offline.access`。
 - **schema 注意**：Articles API 较新。围栏代码按官方 schema 使用 `atomic` block 指向 `type: markdown`、`mutability: mutable` 的 entity，完整代码放入 `data.markdown`；图片 entity 只有 `caption`，没有图注对齐字段。`cover_media` 结构已实测确认为 `{media_id, media_category}`；link entity 按 DraftJS 惯例实现、API 已接受。若草稿内容渲染异常，先 `--dry-run` 核对 JSON，再对照 [创建草稿官方文档](https://docs.x.com/x-api/articles/create-draft-article) 当前版本调整。
+- **三级标题兼容性**：2026-08-25 的单项实测中，`blockquote` 与 `header-two` 均可创建草稿，`header-three` 单独出现则返回 503。脚本因此把 H3-H6 自动降级为整段粗体的 `unstyled` 块。

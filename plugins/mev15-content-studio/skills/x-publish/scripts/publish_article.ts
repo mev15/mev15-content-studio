@@ -196,6 +196,17 @@ function pushTextBlock(plan: ContentPlan, type: string, raw: string, depth?: num
   plan.blocks.push(block);
 }
 
+/** X Articles 的 header-three 会触发 503；H3+ 改为保留行内语义的整段粗体普通块。 */
+function pushBoldTextBlock(plan: ContentPlan, raw: string): void {
+  pushTextBlock(plan, 'unstyled', raw);
+  const block = plan.blocks[plan.blocks.length - 1];
+  const nonBoldStyles = (block.inline_style_ranges ?? []).filter((range) => range.style !== 'bold');
+  block.inline_style_ranges = [
+    { offset: 0, length: block.text.length, style: 'bold' },
+    ...nonBoldStyles,
+  ];
+}
+
 /** 表格 → 无序列表：第一行视为表头、第一列视为行主键 */
 function pushTable(plan: ContentPlan, rows: string[][]): void {
   if (rows.length < 2) return;
@@ -284,12 +295,7 @@ export function mdToPlan(md: string, opts: { title?: string } = {}): ContentPlan
       const level = h[1].length;
       if (level === 1) pushTextBlock(plan, 'header-one', h[2]);
       else if (level === 2) pushTextBlock(plan, 'header-two', h[2]);
-      else if (level === 3) pushTextBlock(plan, 'header-three', h[2]);
-      else {
-        // X 无 H4-H6：降级为整段粗体
-        const { text } = parseInline(h[2]);
-        plan.blocks.push({ text, type: 'unstyled', inline_style_ranges: [{ offset: 0, length: text.length, style: 'bold' }] });
-      }
+      else pushBoldTextBlock(plan, h[2]);
       continue;
     }
 

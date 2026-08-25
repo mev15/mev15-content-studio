@@ -34,6 +34,44 @@ test('adjacent physical text lines remain separate blocks', () => {
   ]);
 });
 
+test('H3 and deeper headings become bold unstyled blocks while H2 stays native', () => {
+  const plan = mdToPlan([
+    '# 标题',
+    '',
+    '## 二级标题',
+    '',
+    '### 三级 *斜体* [链接](https://example.com)',
+    '',
+    '#### 四级标题',
+  ].join('\n'));
+
+  assert.deepEqual(plan.blocks, [
+    { text: '二级标题', type: 'header-two' },
+    {
+      text: '三级 斜体 链接',
+      type: 'unstyled',
+      inline_style_ranges: [
+        { offset: 0, length: 8, style: 'bold' },
+        { offset: 3, length: 2, style: 'italic' },
+      ],
+      entity_ranges: [{ key: 0, offset: 6, length: 2 }],
+    },
+    {
+      text: '四级标题',
+      type: 'unstyled',
+      inline_style_ranges: [{ offset: 0, length: 4, style: 'bold' }],
+    },
+  ]);
+  assert.deepEqual(plan.entities, [{
+    key: '0',
+    value: {
+      type: 'link',
+      mutability: 'mutable',
+      data: { url: 'https://example.com' },
+    },
+  }]);
+});
+
 test('extensionless remote images use HTTP Content-Type', () => {
   assert.equal(normalizeRemoteImageFilename('RoXNVkrYl5Rk37nEXPRE', 'image/png'), 'RoXNVkrYl5Rk37nEXPRE.png');
   assert.equal(normalizeRemoteImageFilename('cover', 'image/jpeg; charset=binary'), 'cover.jpg');
